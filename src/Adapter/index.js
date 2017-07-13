@@ -1,26 +1,5 @@
 /* eslint-disable id-length*/
 import Gun from 'gun/gun';
-const writing = Symbol('In-process writes');
-const notFound = /(NotFound|not found|not find)/i;
-const options = {
-  valueEncoding: 'json',
-};
-
-/* eslint-disable */
-const union = function union(vertex, node, opt){
-	if(!node || !node._){ return }
-	vertex = vertex || Gun.state.to(node);
-	if(!vertex || !vertex._){ return }
-	opt = Gun.num.is(opt)? {machine: opt} : {machine: Gun.state()};
-	opt.union = Gun.obj.copy(vertex); // Slow performance.
-	if(!Gun.node.is(node, function(val, key){
-		var HAM = Gun.HAM(opt.machine, Gun.state.is(node, key), Gun.state.is(vertex, key, true), val, vertex[key]);
-		if(!HAM.incoming){ return }
-		Gun.state.to(node, key, opt.union);
-	})){ return }
-	return opt.union;
-}
-/* eslint-enable */
 
 function noop() {}
 
@@ -43,6 +22,22 @@ const errors = {
   lost: new AdapterErr("Key not found", 400),
   internal: new AdapterErr("Internal adapter err", 500)
 }
+
+/* eslint-disable */
+const union = function union(vertex, node, opt){
+	if(!node || !node._){ return }
+	vertex = vertex || Gun.state.to(node);
+	if(!vertex || !vertex._){ return }
+	opt = Gun.num.is(opt)? {machine: opt} : {machine: Gun.state()};
+	opt.union = Gun.obj.copy(vertex); // Slow performance.
+	if(!Gun.node.is(node, function(val, key){
+		var HAM = Gun.HAM(opt.machine, Gun.state.is(node, key), Gun.state.is(vertex, key, true), val, vertex[key]);
+		if(!HAM.incoming){ return }
+		Gun.state.to(node, key, opt.union);
+	})){ return }
+	return opt.union;
+}
+/* eslint-enable */
 
 /**
  *  Construct the context used for adapter methods.
@@ -167,21 +162,33 @@ export default class Adapter {
     * @param  {Error} [err] - An error given by level.
     * @returns {undefined}
     */
-    function writeHandler (err = null) {
+    function writeHandler (err = null, uid, node, existing) {
 
-      // Report whether it succeeded.
-      gun._.root.on('in', {
-        '@': context['#'],
-        ok: !err,
-        err,
-      });
+      // Done handler
+      function done(err = null) {
+        // Report whether it succeeded.
+        gun._.root.on('in', {
+          '@': context['#'],
+          ok: !err,
+          err,
+        });
+      }
+
+      if (!err && node && existing) {
+        node = union(node, JSON.parse(existing.val));
+      }
+      if (node) {
+        this._put(uid, node, done);
+      }
     }
 
     // Each node in the graph...
     keys.forEach((uid) => {
       let node = graph[uid];
-      this._put(uid, node, writeHandler);
-    });
+      this._get(uid, (err, existing) => {
+        writeHandler.call(this, err, uid, node, existing);
+      });
+    }, this);
 
   }
 

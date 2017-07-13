@@ -24,20 +24,77 @@ const union = function union(vertex, node, opt){
 
 function noop() {}
 
+class AdapterErr extends Error {
+  constructor(message, code, fileName, lineNumber) {
+    super(message, fileName, lineNumber);
+    this._code = code;
+
+    this.code = () => {
+      return this._code;
+    }
+  }
+}
+
+const errors = {
+  codes: {
+    lost: 400,
+    internal: 500
+  },
+  lost: new AdapterErr("Key not found", 400),
+  internal: new AdapterErr("Internal adapter err", 500)
+}
+
+/**
+ *  Construct the context used for adapter methods.
+ *  The design intention to expose only methods needed
+ *  but still be able to reference the adater
+ *  
+ *  @param {Adapter} adapter   Adapter instance
+ * 
+ *  @return {object} A plain object that will serve as context for the client methods
+ */
+function clientContext(adapter) {
+  return {
+    on: (ev, callback) => {
+      if (adapter.context) {
+        adapter.context.on(ev, function(gun) {
+          this.to.next(gun);
+          callback(gun);
+        });
+      }
+    },
+    errors
+  }
+}
+
 /**
  * Read/write hooks for Gun.
  *
  * @private
- * @param {LevelUP} level - A LevelUP interface.
+ * @param {object} adapter - A plain object with adapter methods
  * @class
  */
 export default class Adapter {
 
   constructor (adapter) {
 
-    this.opt = adapter.opt || noop;
-    this.get = adapter.get || noop;
-    this.put = adapter.put || noop;
+    const outerContext = clientContext(this);
+
+    this._opt = adapter.opt ? adapter.opt.bind(outerContext) : noop;
+    this._get = adapter.get ? adapter.get.bind(outerContext) : noop;
+    this._put = adapter.put ? adapter.put.bind(outerContext) : noop;
+
+    for (let methodName in adapter) {
+      if ({}.hasOwnProperty.call(adapter, methodName)
+          && ['opt', 'get', 'put', 'on'].indexOf(methodName === -1)
+        ) {
+          if (typeof adapter[methodName] === 'function') {
+            outerContext[methodName] = adapter[methodName].bind(outerContext);
+          } else {
+            outerContext[methodName] = adapter[methodName];
+          }
+      }
+    }
 
     // Preserve the `this` context for read/write calls.
     this.read = this.read.bind(this);
@@ -45,14 +102,25 @@ export default class Adapter {
   }
 
   /**
+   * Handle Gun `opt` event
+   * 
+   * @param {gun} context   The gun context firing the event 
+   * 
+   * @returns {void}
+   */
+  opt(context) {
+    this.context = context;
+    this._opt(context, context.opt || {});
+  }
+
+  /**
    * Read a key from LevelDB.
    *
    * @param  {Object} context - A gun request context.
-   * @returns {undefined}
+   * @returns {void}
    */
   read (context) {
     const { get, gun } = context;
-    const { level } = this;
     const { '#': key } = get;
 
     const done = (err, data) => gun._.root.on('in', {
@@ -61,17 +129,12 @@ export default class Adapter {
       err,
     });
 
-    const value = level[writing][key];
-    if (value) {
-      return done(null, value);
-    }
-
     // Read from level.
-    return this.get(key, options, (err, result) => {
+    return this._get(key, (err, result) => {
 
       // Error handling.
       if (err) {
-        if (err.code === 400) {
+        if (err.code() === errors.codes.lost) {
 
           // Tell gun nothing was found.
           done(null);
@@ -91,7 +154,7 @@ export default class Adapter {
    * Write a every node in a graph to level.
    *
    * @param  {Object} context - A gun write context.
-   * @returns {undefined}
+   * @returns {void}
    */
   write (context) {
     const { put: graph, gun } = context;
@@ -117,15 +180,7 @@ export default class Adapter {
     // Each node in the graph...
     keys.forEach((uid) => {
       let node = graph[uid];
-      const value = {}; // todo
-
-      // Check to see if it's in the process of writing.
-      if (value) {
-        node = union(node, value);
-        merged += 1;
-        
-        this.put(node);
-      }
+      this._put(uid, node, writeHandler);
     });
 
   }

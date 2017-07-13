@@ -1,4 +1,5 @@
 import Adapter from './Adapter';
+import Plugin from './Plugin';
 import Gun from 'gun/gun';
 
 /**
@@ -56,23 +57,24 @@ function bootstrapExtension(adapter) {
 }
 
 
-module.exports = {
-  adapter: function(adapt) {
-    if (!adapt || !(typeof adapt.get === 'function' || typeof adapt.put === 'function')) {
-      throw `An adapter must implement either a get or a put method, like so:
-      flint.adapter({
-          get: function() {},
-          put: function() {}
-      });`;
+const flint = {
+  register: function(mod = null) {
+    if (!mod) {
+      throw "Flint.register requires an instance of either Flint.Adapter or Flint.Plugin";
     }
 
-    let newAdapter = new Adapter(adapt);
-    bootstrapAdapter(newAdapter);
-  },
-  plugin: function(methods) {
-    for (let methodName in methods) {
-      var method = methods[methodName];
+    if (mod instanceof Adapter) {
+      bootstrapAdapter(mod)
+    } else if (mod instanceof Plugin) {
+      bootstrapExtension(mod);
+    } else {
+      throw "Attempting to register an unsupported Gun extension with Flint. Flint.register requires an instance of either Flint.Adapter or Flint.Plugin";
     }
   },
+  Adapter,
+  Plugin,
   NOT_FOUND: 400,
 };
+flint.Flint = flint;
+
+module.exports = flint;

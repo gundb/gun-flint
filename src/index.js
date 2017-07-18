@@ -1,10 +1,17 @@
-import Adapter from './Adapter';
+import BaseAdapter from './Adapter/base-adapter';
+import DeltaAdapter from './Adapter/delta-adapter';
+import KeyValAdapter from './Adapter/key-val-adapter';
+import NodeAdapter from './Adapter/node-adapter';
 import Plugin from './Plugin';
 import Gun from 'gun/gun';
 
 /**
+ * @listens {Gun.opt}
+ * @listens {Gun.get}
+ * @listens {Gun.put}
  * 
- * @param {*} adapter 
+ * @param {BaseAdapter} adapter - The
+ * @return {void}
  */
 function bootstrapAdapter(adapter) {
 
@@ -23,55 +30,36 @@ function bootstrapAdapter(adapter) {
     };
 
     // Register the driver.
-    context.on('get', pluginInterop(adapter.read));
-    context.on('put', pluginInterop(adapter.write));
+    context.on('get', pluginInterop(adapter._read));
+    context.on('put', pluginInterop(adapter._write));
   });
 }
 
 
 /**
- * 
- * @param {*} adapter 
+ * @todo
  */
-function bootstrapExtension(adapter) {
-  const Gun = require('gun/gun');
-
-  if (!Gun) {
-    throw "Unable to retrieve a Gun instance. This is probably because you tried to import Gun after this Gun plugin. Makes sure that you import all plugins after you've imported Gun.";
-  }
-
-  Gun.on('opt', function(context) {
-    this.to.next(context);
-    adapter.opt(context);
-
-    // Allows other plugins to respond concurrently.
-    const pluginInterop = (middleware) => function (context) {
-      this.to.next(context);
-      return middleware(context);
-    };
-
-    // Register the driver.
-    context.on('get', pluginInterop(adapter.read));
-    context.on('put', pluginInterop(adapter.write));
-  });
+function bootstrapExtension(extension) {
 }
 
 
 const flint = {
-  register: function(mod = null) {
-    if (!mod) {
+  register: function(extension = null) {
+    if (!extension) {
       throw "Flint.register requires an instance of either Flint.Adapter or Flint.Plugin";
     }
 
-    if (mod instanceof Adapter) {
-      bootstrapAdapter(mod)
-    } else if (mod instanceof Plugin) {
-      bootstrapExtension(mod);
+    if (extension instanceof BaseAdapter) {
+      bootstrapAdapter(extension)
+    } else if (extension instanceof Plugin) {
+      bootstrapExtension(extension);
     } else {
       throw "Attempting to register an unsupported Gun extension with Flint. Flint.register requires an instance of either Flint.Adapter or Flint.Plugin";
     }
   },
-  Adapter,
+  DeltaAdapter,
+  NodeAdapter,
+  KeyValAdapter,
   Plugin,
   NOT_FOUND: 400,
 };

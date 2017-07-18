@@ -1,4 +1,4 @@
-# Node Adapter
+# Key:Value Adapter
 
 The Key:Value adapter stores Gun nodes as Key:value pairs (along with some metadata for each node).
 

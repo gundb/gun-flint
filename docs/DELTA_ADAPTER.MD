@@ -1,4 +1,4 @@
-# Node Adapter
+# Delta Adapter
 
 The Delta adapter provides the lowest level functionality and greatest flexibility. `Put`s are sent as deltas of the current node. Ensure that you properly handle merging in the delta received during write so that you don't overwrite existing node data.
 

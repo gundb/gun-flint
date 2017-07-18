@@ -16,7 +16,7 @@ Since Gun is a graph database, its data structure requires some special consider
 
 Building your Gun-Flint gives you an advantage of allowing Flint to ensure that the data coming from Gun reaches your adapter in a consistent format and returns data to Gun in a format that it recognizes.
 
-### Node Storage
+### [Node Storage](/docs/NODE_ADAPTER.md)
 
 `get` request expect to read an entire Gun node; `put` requests write an entire node.
 
@@ -29,7 +29,9 @@ Cons:
 
 **When to Use:** Most/all nodes are small; optimal for document-based databases (e.g., MongoDB; Postgres)
 
-### Key:Value
+Example: [gun-mongo](https://github.com/sjones6/gun-mongo)
+
+### [Key:Value](/docs/KEY_VAL_ADAPTER.md)
 
 `get` request returns an array/list of nodes properties; `put` requests write batch updates to specific node's key:value pairs.
 
@@ -44,7 +46,9 @@ Cons:
 
 **When to Use:** Nodes are small/medium in size; optimal for SQL databases (MySQL, MSSql)
 
-### Delta Storage
+Example: [gun-mysql](https://github.com/sjones6/gun-mysql)
+
+### [Delta Storage](/docs/DELTA_ADAPTER.MD)
 
 `get` request return an entire node, formatted in a way Gun recognizes; `put` requests receive a delta (diff) of node properties as well as conflict-resolution state indicators.
 

@@ -3,6 +3,7 @@ import DeltaAdapter from './Adapter/delta-adapter';
 import KeyValAdapter from './Adapter/key-val-adapter';
 import NodeAdapter from './Adapter/node-adapter';
 import Plugin from './Plugin';
+import Util from './Adapter/util';
 import Gun from 'gun/gun';
 
 /**
@@ -61,6 +62,7 @@ const flint = {
   NodeAdapter,
   KeyValAdapter,
   Plugin,
+  Util,
   NOT_FOUND: 400,
 };
 flint.Flint = flint;

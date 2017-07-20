@@ -26,6 +26,7 @@ Pros:
 
 Cons:
 * Slower performance (requires a read > merge for every write); this is especially problematic if your data requires large nodes (e.g., a `users` node with millions of `user`s)
+* Large nodes could overwhelm memory and cause crashes; if you anticipate this, consider [Key:Value](https://github.com/sjones6/gun-flint/blob/master/docs/KEY_VAL_ADAPTER.MD) storage with streaming.
 
 **When to Use:** Most/all nodes are small; optimal for document-based databases (e.g., MongoDB; Postgres)
 

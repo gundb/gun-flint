@@ -21,24 +21,42 @@ export default {
         return opt.union;
     },
     gunify: (key, vals = []) => {
-    let node = {
-      '#': key,
-      '_': {
-        '>': {
-          '#': key
+      let node = {
+        '#': key,
+        '_': {
+          '>': {
+            '#': key
+          }
         }
+      };
+
+      function applyResult(val) {
+
+          // metadata
+          node._['>'][val.nodeKey] = val.state;
+
+          // relation
+          if (val.rel) {
+            node[val.nodeKey] = {
+              '#': val.rel
+            }
+          } else {
+
+            // value
+            node[val.nodeKey] = !isNil(val.val) ? val.val : ""
+          }
       }
-    };
-    vals.forEach(val => {
-      node._['>'][val.nodeKey] = val.state;
-      if (val.rel) {
-        node[val.nodeKey] = {
-          '#': val.rel
-        }
+
+      // Vals is an array. Add each to the node
+      if (typeof vals === 'array' && vals.length) {
+          vals.forEach(applyResult);
       } else {
-        node[val.nodeKey] = !isNil(val.val) ? val.val : ""
+
+        // Vals is an object. Just write that one.
+        applyResult(vals);
       }
-    });
-    return node;
-  }
+
+      // finish
+      return node;
+    }
 };

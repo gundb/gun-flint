@@ -17,8 +17,9 @@ export default class KeyValAdapter extends BaseAdapter {
      *  @return {void}
      */
     read(result, done) {
-        if (result && result instanceof Array && result.length) {
-            result = Util.gunify(result[0].key, result);
+        if (result) {
+            const key = result instanceof Array && result.length ? result[0].key : result.key;
+            result = Util.gunify(key, result);
         }
         done(null, result);
     }

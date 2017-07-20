@@ -51,10 +51,10 @@ export default class BaseAdapter {
      * @returns {void}
      */
     _read(context) {
-        const { '#': dedupId, get, gun } = context;
+        const { '#': dedupId, get } = context;
         const { '#': key } = get;
 
-        const done = (err, data) => gun._.root.on('in', {
+        const done = (err, data) => this.context.on('in', {
             '@': dedupId,
             put: Gun.graph.node(data),
             err
@@ -92,12 +92,12 @@ export default class BaseAdapter {
      *  @param {object} context  Gun write context
      */
     _write(context) {
-        const { put: delta, '#': uuid, gun } = context;
+        const { put: delta, '#': uuid } = context;
 
         // Done handler
-        function done(err = null) {
+        const done = (err = null) => {
             // Report whether it succeeded.
-            gun._.root.on('in', {
+            this.context.on('in', {
                 '@': uuid,
                 ok: !err,
                 err,

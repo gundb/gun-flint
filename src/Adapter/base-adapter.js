@@ -1,5 +1,7 @@
 import AdapterContext from './adapter-context';
+import BaseMixin from './../Mixin/base-mixin';
 import Gun from 'gun/gun';
+
 
 export default class BaseAdapter {
 
@@ -26,6 +28,14 @@ export default class BaseAdapter {
         // These receive context from Gun when they are called
         this._read = this._read.bind(this);
         this._write = this._write.bind(this);
+
+        if (adapter.mixins && adapter.mixins.length) {
+            adapter.mixins.forEach(mixin => {
+                if (mixin && mixin.prototype instanceof BaseMixin) {
+                    new mixin(this);
+                }
+            })
+        }
 
         return this;
     }

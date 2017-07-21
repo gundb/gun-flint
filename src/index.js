@@ -6,6 +6,11 @@ import Plugin from './Plugin';
 import Util from './Adapter/util';
 import Gun from 'gun/gun';
 
+// Bundles Mixins
+import BaseMixin from './Mixin/base-mixin';
+import ResultStreamMixin from './Mixin/ResultStreamMixin';
+
+
 /**
  * @listens {Gun.opt}
  * @listens {Gun.get}
@@ -63,6 +68,11 @@ const flint = {
   KeyValAdapter,
   Plugin,
   Util,
+  BaseMixin,
+  Mixins: {
+    BaseMixin,
+    ResultStreamMixin
+  },
   NOT_FOUND: 400,
 };
 flint.Flint = flint;

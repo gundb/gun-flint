@@ -34,10 +34,20 @@ Flint.register(new KeyValAdapter({
      * }
      * 
      * @param {string}   key   The UUID for the node to retrieve
+     * @param  {string}  [field]   If supplied, get a single field; otherwise full node is requested
      * @param {callback} done  Callback after retrieval is finished
      */
-    get: function(key, done) {
-        retrieveDataRecords(key).then((err, records) => {
+    get: function(key, field done) {
+
+        // Determine if field or full node requested
+        let retrievalPromise;
+        if (field) {
+            retrievalPromise = this.getFieldFromStorage(key, field);
+        } else {
+            retrievalPromise = this.getNodeFromStorage(key);
+        }
+
+        retrievalPromise().then((err, records) => {
             done(err, records);
         });
     },
@@ -49,7 +59,7 @@ Flint.register(new KeyValAdapter({
      * 
      * 
      * @param {string}   key    The UUID for the node request
-     * @param {array}   batch   Array of objects that contain key:value data
+     * @param {array}   batch   Array of objects that contain key:value + metadata
      * @param {function} done   Call after operation finishes
      */
     put: function(key, batch, done) {
@@ -86,11 +96,18 @@ Flint.register(new KeyValAdapter({
     /**
      * All of the above applies for formatting of object.
      * 
-     * @param {string}   key   The UUID for the node to retrieve
+     * @param {string}   key       The UUID for the node to retrieve
+     * @param  {string}  [field]   If supplied, get a single field; otherwise full node is requested
      * @param {callback} done  Callback after retrieval is finished
      */
-    get: function(key, done) {
-        const stream = this.getDataStreamFromStorage(key);
+    get: function(key, field, done) {
+
+        let stream;
+        if (field) {
+            stream = this.getFieldFromStorage(key, field);
+        } else {
+            stream = this.getNodeStreamFromStorage(key);
+        }
 
         let streamErr = null;
         let receivedResults = false;

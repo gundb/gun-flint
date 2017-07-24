@@ -11,13 +11,17 @@ Flint.register(new DeltaAdapter({
      * Send data back into Gun. Return as a valid Gun object
      *
      * You can do anything you like with the delta for storage purposes, 
-     * but you must return to gun a node in the format that Gun recognizes.
+     * but you must return to data to gun in the format that Gun recognizes.
      *
-     * @param {string}   key   The UUID for the node to retrieve
-     * @param {callback} done  Callback after retrieval is finished
+     * NOTE: the second parameter `field`, if supplied, indicates that a specific node
+     *       field is requested; if empty, then an entire node is requested.
+     *
+     * @param {string}   key     The UUID for the node to retrieve
+     * @param {string}   [field] If supplied, a specific field to retrieve; if not supplied, get full node
+     * @param {callback} done    Callback after retrieval is finished
      */
-    get: function(key, done) {
-        retrieveData(key).then((err, node) => {
+    get: function(key, field, done) {
+        retrieveData(key, field).then((err, node) => {
             done(err, node);
         });
     },
@@ -28,7 +32,7 @@ Flint.register(new DeltaAdapter({
      * Note that the delta parameter is NOT a full node but
      * only a diff that is produced at time of `put` request.
      * 
-     * !Warning! Treating the delta as a node can result in data loss!!
+     * !Warning! Treating the delta as a full node can result in data loss!!
      * 
      * @param {string}   key    The UUID for the node request
      * @param {object}   delta  Node with metadata (required)

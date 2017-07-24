@@ -4,7 +4,8 @@ Flint.register(new DeltaAdapter({
     opt: function(context, option) {
         this.mem = option.mem;
     },
-    get: function(key, done) {
+    get: function(key, field, done) {
+        console.log({key, field, done});
         this.mem.get(key, (err, res) => {
             if (!err && !res || err && /(NotFound|not found|not find)/i.test(err.message)) {
                 done(this.errors.lost)

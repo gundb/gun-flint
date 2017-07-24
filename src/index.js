@@ -1,80 +1,46 @@
-import BaseAdapter from './Adapter/base-adapter';
+// Base
+import BaseExtension from './base-extension';
+
+// Adapters
 import DeltaAdapter from './Adapter/delta-adapter';
 import KeyValAdapter from './Adapter/key-val-adapter';
 import NodeAdapter from './Adapter/node-adapter';
+
+// Plugins
 import Plugin from './Plugin';
-import Util from './Adapter/util';
-import Gun from 'gun/gun';
+
+// Middleware
+import Middleware from './Middleware/base-middleware';
 
 // Bundles Mixins
 import BaseMixin from './Mixin/base-mixin';
 import ResultStreamMixin from './Mixin/ResultStreamMixin';
 
+// Utils
+import Util from './Adapter/util';
 
-/**
- * @listens {Gun.opt}
- * @listens {Gun.get}
- * @listens {Gun.put}
- * 
- * @param {BaseAdapter} adapter - The
- * @return {void}
- */
-function bootstrapAdapter(adapter) {
-
-  if (!Gun) {
-    throw "Unable to retrieve a Gun instance. This is probably because you tried to import Gun after this Gun plugin. Makes sure that you import all plugins after you've imported Gun.";
-  }
-
-  Gun.on('opt', function(context) {
-    this.to.next(context);
-    adapter.opt(context);
-
-    // Allows other plugins to respond concurrently.
-    const pluginInterop = (middleware) => function (context) {
-      this.to.next(context);
-      return middleware(context);
-    };
-
-    // Register the driver.
-    context.on('get', pluginInterop(adapter._read));
-    context.on('put', pluginInterop(adapter._write));
-  });
-}
-
-
-/**
- * @todo
- */
-function bootstrapExtension(extension) {
-}
-
-
+// Flint
 const flint = {
   register: function(extension = null) {
-    if (!extension) {
-      throw "Flint.register requires an instance of either Flint.Adapter or Flint.Plugin";
+    if (!extension || !(extension instanceof BaseExtension)) {
+      throw "Flint.register requires an instance that extends BaseExtension.";
     }
-
-    if (extension instanceof BaseAdapter) {
-      bootstrapAdapter(extension)
-    } else if (extension instanceof Plugin) {
-      bootstrapExtension(extension);
-    } else {
-      throw "Attempting to register an unsupported Gun extension with Flint. Flint.register requires an instance of either Flint.Adapter or Flint.Plugin";
-    }
+    extension.bootstrap();
   },
   DeltaAdapter,
   NodeAdapter,
   KeyValAdapter,
   Plugin,
-  Util,
+  Middleware,
   BaseMixin,
   Mixins: {
     BaseMixin,
     ResultStreamMixin
   },
-  NOT_FOUND: 400,
+  Util
 };
+
+// Add circular reference for easier importing
 flint.Flint = flint;
 
 module.exports = flint;

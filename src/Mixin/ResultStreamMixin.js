@@ -44,9 +44,9 @@ export default class ResultStreamMixin extends BaseMixin {
      * @param {function} next - Next method in Adapter/Mixin chain
      * @returns {void}
      */
-    _get(key, done, next) {
+    _get(key, field, done, next) {
         const stream = new ResultStream(done);
-        next(key, stream)
+        next(key, field, stream)
     }
 
 }

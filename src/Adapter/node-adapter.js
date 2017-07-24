@@ -14,6 +14,24 @@ import AdapterContext from './adapter-context';
 export default class Adapter extends BaseAdapter {
 
   /**
+   * @override
+   * @instance
+   * @public
+   * 
+   * @param {string}   key      the node key 
+   * @param {string}   [field]  the field requested, if applicable
+   * @param {callback} done     Call after read completed
+   */
+  get(key, field, done) {
+    this._get(key, (err, result) => {
+      if (result && field) {
+        result = Gun.state.to(result, field);
+      }
+      done(err, result);
+    });
+  }
+
+  /**
    *  @param {Object|String}   result    - A Gun node; or stringified Gun node
    *  @param {Function}        callback - Call once read finished
    *  @return {void}

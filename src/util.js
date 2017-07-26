@@ -33,17 +33,17 @@ export default {
       function applyResult(val) {
 
           // metadata
-          node._['>'][val.nodeKey] = val.state;
+          node._['>'][val.field] = val.state;
 
           // relation
           if (val.rel) {
-            node[val.nodeKey] = {
+            node[val.field] = {
               '#': val.rel
             }
           } else {
 
             // value
-            node[val.nodeKey] = !isNil(val.val) ? val.val : ""
+            node[val.field] = !isNil(val.val) ? val.val : ""
           }
       }
 

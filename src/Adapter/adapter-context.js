@@ -1,4 +1,4 @@
-import Util from './util';
+import Util from './../util';
 import AdapterError from './adapter-error.js';
 
 const errors = {

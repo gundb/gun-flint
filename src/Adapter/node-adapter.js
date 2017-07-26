@@ -1,5 +1,5 @@
 import Gun from 'gun/gun';
-import Util from './util';
+import Util from './../util';
 import BaseAdapter from './base-adapter';
 import AdapterContext from './adapter-context';
 

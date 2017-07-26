@@ -7,7 +7,7 @@ import KeyValAdapter from './Adapter/key-val-adapter';
 import NodeAdapter from './Adapter/node-adapter';
 
 // Plugins
-import Plugin from './Plugin';
+import Plugin from './Plugin/base-plugin';
 
 // Middleware
 import Middleware from './Middleware/base-middleware';
@@ -17,7 +17,7 @@ import BaseMixin from './Mixin/base-mixin';
 import ResultStreamMixin from './Mixin/ResultStreamMixin';
 
 // Utils
-import Util from './Adapter/util';
+import Util from './util';
 
 // Flint
 const flint = {

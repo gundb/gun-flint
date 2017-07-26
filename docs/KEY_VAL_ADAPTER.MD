@@ -20,7 +20,7 @@ Flint.register(new KeyValAdapter({
      * Value:
      * {
      *    key:     "the node key/UUID",
-     *    nodeKey: "the key for the property on the node"
+     *    field: "the key for the property on the node"
      *    val:     "value for this key",
      *    state:   12463461341462
      * }
@@ -28,7 +28,7 @@ Flint.register(new KeyValAdapter({
      * Relationship:
      * {
      *    key:     "the node key/UUID",
-     *    nodeKey: "the key for the property on the node"
+     *    field: "the key for the property on the node"
      *    val:     "value for this key",
      *    rel:     "key to some other node in the graph"
      * }
@@ -62,10 +62,28 @@ Flint.register(new KeyValAdapter({
      * @param {array}   batch   Array of objects that contain key:value + metadata
      * @param {function} done   Call after operation finishes
      */
-    put: function(key, batch, done) {
-        writeData(key, delta, done).then(err => {
-            done(err);
-        });
+    put: function(batch = [], done) {
+
+        let target = batch.length;
+        let written = 0;
+        let record = () => {
+            written++;
+
+            // Send back write acknowledgement after all key:vals written
+            if (written === target) {
+                done();
+            }
+        }
+
+        batch.forEach(keyVal => {
+            write(keyVal).then(err => {
+                if (err) {
+                    done(err);
+                } else {
+                    record();
+                }
+            });
+        })
     },
 
     /**

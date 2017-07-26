@@ -1,5 +1,5 @@
 import BaseAdapter from './base-adapter';
-import Util from './util';
+import Util from './../util';
 import Gun from 'gun/gun';
 
 export default class KeyValAdapter extends BaseAdapter {
@@ -33,25 +33,37 @@ export default class KeyValAdapter extends BaseAdapter {
         const keys = Object.keys(delta);
 
         // Batch together key:val writes
-        keys.forEach(nodeKey => {
-            let nodeDelta = delta[nodeKey];
-            const conflictState = nodeDelta._['>'];
-            const batch = Object.keys(nodeDelta).map(key => {
-                if (key !== '_') {
-                    let state = conflictState[key];
-                    let node = { state, key };
-                    if (Gun.obj.is(nodeDelta[key])) {
-                        node.rel = nodeDelta[key]['#'];
-                    } else {
-                        node.val = nodeDelta[key]; 
-                    }
-                    return node;
-                }
-            }).filter(node => node);
+        const batch = [];
 
-            if (batch && batch.length) {
-                this._put(nodeKey, batch, done);
-            }
+        // Iterate through each node in the delta
+        keys.forEach(key => {
+            let nodeDelta = delta[key];
+            const conflictState = nodeDelta._['>'];
+
+            // Iterate through each field in the node delta
+            Object.keys(nodeDelta).map(field => {
+
+                // Ignore meta info
+                if (field !== '_') {
+                    let state = conflictState[field];
+
+                    // base node
+                    let node = { state, field, key };
+
+                    // Add rel or val
+                    if (Gun.obj.is(nodeDelta[field])) {
+                        node.rel = nodeDelta[field]['#'];
+                    } else {
+                        node.val = nodeDelta[field]; 
+                    }
+                    batch.push(node);
+                }
+            });
         }, this);
+
+        // Write batch
+        if (batch.length) {
+            this._put(batch, done);
+        }
     }
 }

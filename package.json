@@ -1,6 +1,6 @@
 {
   "name": "gun-flint",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Micro-framework for building Gun adapters",
   "main": "dist/index.js",
   "scripts": {

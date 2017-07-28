@@ -22,10 +22,9 @@ export default {
     },
     gunify: (key, vals = []) => {
       let node = {
-        '#': key,
         '_': {
+          '#': key,
           '>': {
-            '#': key
           }
         }
       };

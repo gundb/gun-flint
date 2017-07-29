@@ -14,6 +14,7 @@ import Middleware from './Middleware/base-middleware';
 
 // Bundles Mixins
 import BaseMixin from './Mixin/base-mixin';
+import ProfilerMixin from './Mixin/ProfilerMixin';
 import ResultStreamMixin from './Mixin/ResultStreamMixin';
 
 // Utils
@@ -35,7 +36,8 @@ const flint = {
   BaseMixin,
   Mixins: {
     BaseMixin,
-    ResultStreamMixin
+    ResultStreamMixin,
+    ProfilerMixin
   },
   Util
 };

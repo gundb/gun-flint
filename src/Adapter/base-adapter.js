@@ -211,7 +211,6 @@ export default class BaseAdapter extends BaseExtension {
     _read(context) {
         const { '#': dedupId, get } = context;
         const { '#': key } = get;
-        console.log(dedupId);
 
         // When field === '_', the entire node
         // is requested; otherwise, the property

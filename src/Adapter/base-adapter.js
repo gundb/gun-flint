@@ -22,6 +22,7 @@ export default class BaseAdapter extends BaseExtension {
         this._get = adapter.get ? adapter.get.bind(this.outerContext) : Util.noop;
         this._put = adapter.put ? adapter.put.bind(this.outerContext) : Util.noop;
 
+        // Bind all adapter methods to the outer context
         for (let methodName in adapter) {
             if ({}.hasOwnProperty.call(adapter, methodName)
                 && ['opt', 'get', 'put', 'on'].indexOf(methodName === -1)
@@ -33,6 +34,9 @@ export default class BaseAdapter extends BaseExtension {
                 }
             }
         }
+
+        // Prepare a dedupid hash
+        this.__dedupIds = {};
 
         // Bind context for read and write methods
         // These receive context from Gun when they are called
@@ -63,6 +67,8 @@ export default class BaseAdapter extends BaseExtension {
             throw "Unable to retrieve a Gun instance. This is probably because you tried to import Gun after this Gun plugin. Makes sure that you import all adapters after you've imported Gun.";
         }
 
+        this.adapterId = this.getAdapterId();
+
         var _this = this;
         Gun.on('opt', function(context) {
             this.to.next(context);
@@ -85,6 +91,15 @@ export default class BaseAdapter extends BaseExtension {
     }
 
     /* public */
+
+    /**
+     * Use a unique adapter ID to tag message origins
+     * 
+     * @return {string}  An adapter ID used to tag messages
+     */
+    getAdapterId() {
+        return Date.now() + '_spencer';
+    }
 
     /**
      * Handle Gun `opt` event
@@ -153,6 +168,7 @@ export default class BaseAdapter extends BaseExtension {
      * @returns {void}
      */
     afterRead(dedupId, err, data) {
+        this._recordGet(dedupId);
         this.context.on('in', {
             '@': dedupId,
             put: Gun.graph.node(data),
@@ -172,6 +188,7 @@ export default class BaseAdapter extends BaseExtension {
      * @returns {void}
      */
     afterWrite(dedupId, err) {
+        
         // Report whether it succeeded.
         this.context.on('in', {
             '@': dedupId,
@@ -194,6 +211,7 @@ export default class BaseAdapter extends BaseExtension {
     _read(context) {
         const { '#': dedupId, get } = context;
         const { '#': key } = get;
+        console.log(dedupId);
 
         // When field === '_', the entire node
         // is requested; otherwise, the property
@@ -235,7 +253,45 @@ export default class BaseAdapter extends BaseExtension {
     _write(context) {
         const { put: delta, '#': dedupId } = context;
 
-        // Pass to child implementation
-        return this.write(delta, this.afterWrite.bind(this, dedupId));
+        // Filter out returns from the `get` requests
+        if (this._shouldWrite(context['@'])) {
+            // Pass to child implementation
+            return this.write(delta, this.afterWrite.bind(this, dedupId));
+        }
+    }
+
+    /**
+     * Check the dedup hash to ensure that anything that was 
+     * just pulled from the adapter is passed back in as a write
+     * 
+     * @param {string} dedupId  The request dedup
+     * @return {boolean}        Whether or not the `PUT` linked to this dedupid should be written
+     */
+    _shouldWrite(dedupId) {
+        if (!dedupId) {
+            return;
+        }
+
+        let readCount = 0;
+        if (this.__dedupIds[dedupId]) {
+            readCount = this.__dedupIds[dedupId];
+            this.__dedupIds[dedupId]--;
+            if (this.__dedupIds[dedupId] === 0) {
+                delete this.__dedupIds[dedupId];
+            }
+        }
+        return readCount < 1;
+    }
+
+    /**
+     * Every get should record its dedupId during retrieval in the hash.
+     * 
+     * @param {string} dedupId 
+     */
+    _recordGet(dedupId) {
+        if (!this.__dedupIds[dedupId]) {
+            this.__dedupIds[dedupId] = 0;
+        }
+        this.__dedupIds[dedupId]++;
     }
 }

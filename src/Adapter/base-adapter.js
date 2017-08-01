@@ -4,20 +4,50 @@ import BaseMixin from './../Mixin/base-mixin';
 import Util from './../util';
 import Gun from 'gun/gun';
 
-
+/**
+ * The base class for all adapters
+ * 
+ * Children must, at a minimum extend two methods:
+ * 
+ * <code>
+ * <ul>
+ *  <li>read: handle results from a `get`</li>
+ *  <li>write: handle a `put` request</li>
+ * </ul>
+ * </code>
+ * 
+ * Additionally, the following methods can be overwritten:
+ * 
+ * <code>
+ * <ul>
+ *  <li>get</li>
+ *  <li>afterRead</li>
+ *  <li>afterWrite</li>
+ * </ul>
+ * </code>
+ * 
+ * Here is the flow through the BaseAdapter for a `get` and `put`:
+ * 
+ * Gun.on('get') -> _read -> get -> _get [Adapter does work] -> read -> afterRead
+ * Gun.on('put') -> _write -> write -> _put [Adapter does work] -> afterWrite
+ * 
+ * @class
+ * @extends BaseExtension
+ */
 export default class BaseAdapter extends BaseExtension {
 
     /* lifecyle */
 
     /**
-     * Build the adapter
+     * Build the adapter. This takes an object as its only parameter.
      * 
-     * @param {BaseAdapter} adapter 
+     * @param {object} adapter 
      */
     constructor(adapter) {
         super();
         this.outerContext = AdapterContext.make(this);
 
+        // Bind the three adapter methods to the `this` context
         this._opt = adapter.opt ? adapter.opt.bind(this.outerContext) : Util.noop;
         this._get = adapter.get ? adapter.get.bind(this.outerContext) : Util.noop;
         this._put = adapter.put ? adapter.put.bind(this.outerContext) : Util.noop;
@@ -52,6 +82,7 @@ export default class BaseAdapter extends BaseExtension {
             });
         }
 
+        // finish
         return this;
     }
 
@@ -60,14 +91,15 @@ export default class BaseAdapter extends BaseExtension {
     /**
      * Bootstrap the adapter. Flint calls this method when the adapter is registered
      * 
+     * @instance
+     * @public
+     * 
      * @public
      */
     bootstrap() {
         if (!Gun) {
-            throw "Unable to retrieve a Gun instance. This is probably because you tried to import Gun after this Gun plugin. Makes sure that you import all adapters after you've imported Gun.";
+            throw "Unable to retrieve a Gun instance. This is probably because you tried to import Gun after this Gun adapter. Makes sure that you import all adapter after you've imported Gun.";
         }
-
-        this.adapterId = this.getAdapterId();
 
         var _this = this;
         Gun.on('opt', function(context) {
@@ -89,25 +121,14 @@ export default class BaseAdapter extends BaseExtension {
             context.on('put', pluginInterop(_this._write));
         });
     }
-
-    /* public */
-
-    /**
-     * Use a unique adapter ID to tag message origins
-     * 
-     * @return {string}  An adapter ID used to tag messages
-     */
-    getAdapterId() {
-        return Date.now() + '_spencer';
-    }
-
+    
     /**
      * Handle Gun `opt` event
      * 
      * @instance
      * @public
      * 
-     * @param {gun} context   The gun context firing the event 
+     * @param {object} context   The gun context firing the event 
      * 
      * @returns {void}
      */
@@ -117,19 +138,7 @@ export default class BaseAdapter extends BaseExtension {
     }
 
     /**
-     * @instance
-     * @public
-     * 
-     * @param {string}   key   The UUID for the node to retrieve
-     * @param {string}  [field]   If supplied, get a single field; otherwise full node is requested
-     * @param {callback} done  Callback after retrieval is finished
-     */
-    get(key, field, done) {
-        this._get(key, field, done);
-    }
-
-    /**
-     * Handle a read result from an adapter
+     * Handle a read result from an adapter.
      * 
      * @instance
      * @public
@@ -195,6 +204,18 @@ export default class BaseAdapter extends BaseExtension {
             ok: !err,
             err,
         });
+    }
+
+    /**
+     * @instance
+     * @public
+     * 
+     * @param {string}   key   The UUID for the node to retrieve
+     * @param {string}  [field]   If supplied, get a single field; otherwise full node is requested
+     * @param {callback} done  Callback after retrieval is finished
+     */
+    get(key, field, done) {
+        this._get(key, field, done);
     }
 
     /* private api */
@@ -263,6 +284,9 @@ export default class BaseAdapter extends BaseExtension {
      * Check the dedup hash to ensure that anything that was 
      * just pulled from the adapter is passed back in as a write
      * 
+     * @instance
+     * @private
+     * 
      * @param {string} dedupId  The request dedup
      * @return {boolean}        Whether or not the `PUT` linked to this dedupid should be written
      */
@@ -284,6 +308,9 @@ export default class BaseAdapter extends BaseExtension {
 
     /**
      * Every get should record its dedupId during retrieval in the hash.
+     * 
+     * @instance
+     * @private
      * 
      * @param {string} dedupId 
      */

@@ -268,7 +268,7 @@ export default class BaseAdapter extends BaseExtension {
      */
     _shouldWrite(dedupId) {
         if (!dedupId) {
-            return;
+            return true;
         }
 
         let readCount = 0;

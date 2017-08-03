@@ -1,65 +1,81 @@
-// import { describe, it, beforeEach } from 'mocha';
-// import expect from 'expect';
-// import memdown from 'memdown';
-// import levelup from 'levelup';
-// import Gun from 'gun/gun';
-// import './test_node_adapter';
+import { describe, it, beforeEach } from 'mocha';
+import assert from 'assert';
+import { NodeAdapter, Util } from './../src/index'; 
+import testData from './test_data';
 
-// describe('Gun using level', function () {
+const put = testData.default.put;
+const get = testData.default.get;
+const union = testData.default.union;
 
-//   this.timeout(2000);
+describe('NodeAdapter: interface spec', function () {
 
-//   let gun, mem, key;
+    it('should pass the each node and its key during `put`', done => {
+        
+        let handled = 0;
+        let adapter = new NodeAdapter({
+            get: (key, getDone) => {
 
-//   beforeEach(() => {
-//     key = Math.random().toString(36).slice(2);
-//     mem = levelup('test', { db: memdown });
-//     gun = Gun({ mem });
-//   });
+                // Tell Flint nothing is found to union.
+                getDone(null, null);
+            },
+            put: (key, node, putDone) => {                
+                assert.deepStrictEqual(node, put.put[key]);
+                assert.equal(true, typeof putDone === 'function');
+                
+                // Ensure that all nodes are put before calling `done`
+                handled++;
+                if (handled === Object.keys(put.put).length) {
+                    done();
+                }
+                
+            }
+        });
+        adapter._write(put);
+    });
 
-//   it('should report not found data', (done) => {
-//     gun.get('no such key').val(notFound => {
-//       expect(notFound).toBe(undefined);
-//       done();
-//     });
-//   });
+    it('should request an entire node', done => {
+        let adapter = new NodeAdapter({
+            get: (key, getDone) => {
+                assert.deepStrictEqual(key, get.fullNode.get['#']);
+                assert.equal(true, typeof getDone === 'function');
+                done();
+            }
+        });
+        adapter._read(get.fullNode);
+    });
 
-//   it('should successfully write data', (done) => {
-//     gun.get(key).put({ success: true }, (ctx) => {
-//       expect(ctx.err).toBeFalsy();
-//       done();
-//     });
-//   });
+    it('should request a single node field in the same manner as a `key` field', done => {
+        let adapter = new NodeAdapter({
+            get: (key, getDone) => {
+                assert.deepStrictEqual(key, get.field.get['#']);
+                assert.equal(true, typeof getDone === 'function');
+                done();
+            }
+        });
+        adapter._read(get.field);
+    });
 
-//   it('should be able to read existing data', (done) => {
-//     gun.get(key).put({ success: true });
-//     gun.get(key).val((data) => {
-//       expect(data).toContain({ success: true });
-//       done();
-//     });
-//   });
+    it('should union an existing node before making a put request', done => {
+        
+        // setup and condition
+        let handled = 0;
+        let adapter = new NodeAdapter({
+            get: (key, getDone) => {
+                getDone(null, union[key]);
+            },
+            put: (key, node, putDone) => {
+                assert.deepStrictEqual(node, Util.union(union[key], put.put[key]));
+                
+                // Ensure that all nodes are put before calling `done`
+                handled++;
+                if (handled === Object.keys(put.put).length) {
+                    done();
+                }
+            }
+        });
 
-//   it('should merge with existing data', (done) => {
-//     gun.get(key).put({ data: true });
-//     gun.get(key).put({ success: true });
-//     const data = gun.get(key);
+        // run
+        adapter._write(put);
+    });
 
-//     data.val((value) => {
-//       expect(value).toContain({ success: true, data: true });
-//       done();
-//     });
-//   });
-
-//   it('should resolve circular references', (done) => {
-//     const bob = gun.get('bob').put({ name: 'Bob' });
-//     const dave = gun.get('dave').put({ name: 'Dave' });
-
-//     bob.get('friend').put(dave);
-//     dave.get('friend').put(bob);
-
-//     bob.get('friend').get('friend').val((value) => {
-//       expect(value.name).toBe('Bob');
-//       done();
-//     });
-//   });
-// });
+});

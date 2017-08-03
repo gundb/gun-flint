@@ -1,65 +1,142 @@
-// import { describe, it, beforeEach } from 'mocha';
-// import expect from 'expect';
-// import memdown from 'memdown';
-// import levelup from 'levelup';
-// import Gun from 'gun/gun';
-// import './test_key_val_adapter';
+import { describe, it, beforeEach } from 'mocha';
+import assert from 'assert';
+import { KeyValAdapter } from './../src/index'; 
+import testData from './test_data';
 
-// describe('Gun using level', function () {
+const put = testData.default.put;
+const get = testData.default.get;
 
-//   this.timeout(2000);
+describe('KeyValAdapter: interface spec', function () {
 
-//   let gun, mem, key;
+    it('should pass a batch array and callback during put', done => {
+        
+        // setup
+        let targetLength = 0;
+        Object.keys(put.put).forEach(key => {
+            Object.keys(put.put[key]).forEach(propName => {
+                if (propName !== '_') {
+                    targetLength++;
+                }
+            });
+        });
 
-//   beforeEach(() => {
-//     key = Math.random().toString(36).slice(2);
-//     mem = levelup('test', { db: memdown });
-//     gun = Gun({ mem });
-//   });
+        // condition
+        let adapter = new KeyValAdapter({
+            put: (batch, putDone) => {
+                assert.equal(batch instanceof Array, true);
+                assert.equal(batch.length, targetLength);
+                assert.equal(true, typeof putDone === 'function');
+                done();
+            }
+        });
 
-//   it('should report not found data', (done) => {
-//     gun.get('no such key').val(notFound => {
-//       expect(notFound).toBe(undefined);
-//       done();
-//     });
-//   });
+        // run
+        adapter._write(put);
+    });
 
-//   it('should successfully write data', (done) => {
-//     gun.get(key).put({ success: true }, (ctx) => {
-//       expect(ctx.err).toBeFalsy();
-//       done();
-//     });
-//   });
+    it('should pass pass a key when requesting a full node', done => {
+    
+        // setup and condition
+        let adapter = new KeyValAdapter({
+            get: (key, field, getDone) => {
+                assert.equal(key, get.fullNode.get['#']);
+                assert.equal(field, null);
+                assert.equal(true, typeof getDone === 'function');
+                done();
+            }
+        });
 
-//   it('should be able to read existing data', (done) => {
-//     gun.get(key).put({ success: true });
-//     gun.get(key).val((data) => {
-//       expect(data).toContain({ success: true });
-//       done();
-//     });
-//   });
+        // run
+        adapter._read(get.fullNode);
+    });
 
-//   it('should merge with existing data', (done) => {
-//     gun.get(key).put({ data: true });
-//     gun.get(key).put({ success: true });
-//     const data = gun.get(key);
 
-//     data.val((value) => {
-//       expect(value).toContain({ success: true, data: true });
-//       done();
-//     });
-//   });
+    it('should pass pass a key and field when requesting a singled field', done => {
+    
+        // setup and condition
+        let adapter = new KeyValAdapter({
+            get: (key, field, getDone) => {
+                assert.equal(key, get.field.get['#']);
+                assert.equal(field, get.field.get['.']);
+                assert.equal(true, typeof getDone === 'function');
+                done();
+            }
+        });
 
-//   it('should resolve circular references', (done) => {
-//     const bob = gun.get('bob').put({ name: 'Bob' });
-//     const dave = gun.get('dave').put({ name: 'Dave' });
+        // run
+        adapter._read(get.field);
+    });
 
-//     bob.get('friend').put(dave);
-//     dave.get('friend').put(bob);
+    it('should restructure a key:val object into a Gun-recognizable node', done => {
+    
+        // setup
+        let results = [];
+        let key = get.fullNode.get['#'];
 
-//     bob.get('friend').get('friend').val((value) => {
-//       expect(value.name).toBe('Bob');
-//       done();
-//     });
-//   });
-// });
+        // Breakdown node into an array of results as they should be returned from an adapter
+        let node = put.put[key];
+        Object.keys(node).forEach(propName => {
+            if (propName !== '_' && propName) {
+                results.push({
+                    key,
+                    field: propName,
+                    val: node[propName],
+                    state: node._['>'][propName]
+                });
+            }
+        });
+
+        let adapter = new KeyValAdapter({
+            get: (key, field, getDone) => {
+              getDone(null, results);   
+            }
+        });
+
+        // condition: when inserting into Gun it should again look like the node
+        adapter.afterRead = (dedupId, err, formattedResults) => {
+            assert.deepStrictEqual(formattedResults, node);
+            done();
+        };
+
+        // run
+        adapter._read(get.fullNode);
+    });
+
+    it('should restructure a key:val object into a Gun-recognizable node for a single field', done => {
+    
+        // setup
+        let node;
+        let getResults = (key, field) => {
+            let results = [];
+            node = put.put[key];
+
+            // Breakdown node into an array of results as they should be returned from an adapter
+            Object.keys(node).forEach(propName => {
+                if (propName === field) {
+                    results.push({
+                        key,
+                        field: propName,
+                        val: node[propName],
+                        state: node._['>'][propName]
+                    });
+                }
+            });
+            return results;
+        };
+        let adapter = new KeyValAdapter({
+            get: (key, field, getDone) => {
+              getDone(null, getResults(key, field));   
+            }
+        });
+
+        // condition: when inserting into Gun it should again look like the node
+        adapter.afterRead = (dedupId, err, formattedResults) => {
+            assert.deepStrictEqual(formattedResults, node);
+            done();
+        };
+
+        // run
+        adapter._read(get.field);
+    });
+
+});

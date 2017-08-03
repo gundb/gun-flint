@@ -134,7 +134,7 @@ export default class BaseAdapter extends BaseExtension {
      */
     opt(context) {
         this.context = context;
-        this._opt(context, context.opt || {}, !context.once);
+        this._opt(context, context.opt || {}, !(!context.once));
     }
 
     /**
@@ -149,7 +149,7 @@ export default class BaseAdapter extends BaseExtension {
      * @returns {void}
      */
     read(results, done) {
-        throw "Adapter implementations must extend this method";
+        throw "Adapter implementations must extend the `read` method";
     }
 
     /**
@@ -164,7 +164,7 @@ export default class BaseAdapter extends BaseExtension {
      * @returns {void}
      */
     write(delta, done) {
-        throw "Adapter implementations must extend this method";
+        throw "Adapter implementations must extend the `write` method";
     }
 
     /**

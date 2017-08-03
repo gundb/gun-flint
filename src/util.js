@@ -30,7 +30,6 @@ export default {
       };
 
       function applyResult(val) {
-
           // metadata
           node._['>'][val.field] = val.state;
 
@@ -47,7 +46,7 @@ export default {
       }
 
       // Vals is an array. Add each to the node
-      if (typeof vals === 'array' && vals.length) {
+      if (vals instanceof Array && vals.length) {
           vals.forEach(applyResult);
       } else {
 

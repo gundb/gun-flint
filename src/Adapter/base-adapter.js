@@ -2,7 +2,6 @@ import BaseExtension from './../base-extension';
 import AdapterContext from './adapter-context';
 import BaseMixin from './../Mixin/base-mixin';
 import Util from './../util';
-import Gun from 'gun/gun';
 
 /**
  * The base class for all adapters
@@ -97,12 +96,14 @@ export default class BaseAdapter extends BaseExtension {
      * @public
      */
     bootstrap() {
-        if (!Gun) {
+        this.Gun = require('gun/gun');
+
+        if (!this.Gun) {
             throw "Unable to retrieve a Gun instance. This is probably because you tried to import Gun after this Gun adapter. Makes sure that you import all adapter after you've imported Gun.";
         }
 
         var _this = this;
-        Gun.on('opt', function(context) {
+        this.Gun.on('opt', function(context) {
             this.to.next(context);
             _this.opt(context);
 
@@ -120,6 +121,8 @@ export default class BaseAdapter extends BaseExtension {
             context.on('get', pluginInterop(_this._read));
             context.on('put', pluginInterop(_this._write));
         });
+
+        return this.Gun;
     }
     
     /**
@@ -180,7 +183,7 @@ export default class BaseAdapter extends BaseExtension {
         this._recordGet(dedupId);
         this.context.on('in', {
             '@': dedupId,
-            put: Gun.graph.node(data),
+            put: this.Gun.graph.node(data),
             err
         });
     }

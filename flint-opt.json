@@ -1,0 +1,6 @@
+{
+    "file": false,
+    "mongo": {
+        "collection": "TEST_mongo_key"
+    }
+}

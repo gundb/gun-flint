@@ -12,12 +12,13 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha test/ --opts ./mocha.opts",
+    "mocha": "mocha",
     "lint": "eslint src/",
     "build": "babel src/ -d dist/",
     "prepublish": "npm test && npm run build"
   },
   "bin": {
-    "flint:test": "bin/test.js"
+    "flint": "bin/flint.js"
   },
   "dependencies": {
     "babel-runtime": "^6.11.6",

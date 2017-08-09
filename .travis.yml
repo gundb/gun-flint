@@ -9,6 +9,8 @@ node_js:
 - 6
 script:
 - npm test
+- node ./bin/flint.js test ./test/integration/delta_adapter.js --opt=./test/integration/flint-opt.js
+- node ./bin/flint.js test ./test/integration/node_adapter.js --opt=./test/integration/flint-opt.js
 deploy:
   provider: npm
   email: jones.spencera@gmail.com

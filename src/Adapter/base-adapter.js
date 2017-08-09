@@ -51,6 +51,9 @@ export default class BaseAdapter extends BaseExtension {
         this._get = adapter.get ? adapter.get.bind(this.outerContext) : Util.noop;
         this._put = adapter.put ? adapter.put.bind(this.outerContext) : Util.noop;
 
+        // Add reference to GUN constructor
+        this.outerContext.Gun = this.Gun;
+
         // Bind all adapter methods to the outer context
         for (let methodName in adapter) {
             if ({}.hasOwnProperty.call(adapter, methodName)

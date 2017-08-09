@@ -1,4 +1,3 @@
-import Gun from 'gun/gun';
 import Util from './../util';
 import BaseAdapter from './base-adapter';
 import AdapterContext from './adapter-context';
@@ -25,7 +24,7 @@ export default class Adapter extends BaseAdapter {
   get(key, field, done) {
     this._get(key, (err, result) => {
       if (result && field) {
-        result = Gun.state.to(result, field);
+        result = this.Gun.state.to(result, field);
       }
       done(err, result);
     });
@@ -37,7 +36,7 @@ export default class Adapter extends BaseAdapter {
    *  @return {void}
    */
   read(result, done) {
-    result = Gun.text.is(result) ? JSON.parse(result) : result;
+    result = this.Gun.text.is(result) ? JSON.parse(result) : result;
     done(null, result);
   }
 
@@ -62,7 +61,7 @@ export default class Adapter extends BaseAdapter {
       }
 
       // Write merged node to storage
-      if (node && Gun.obj.is(node)) {
+      if (node && this.Gun.obj.is(node)) {
         this._put(key, node, done);
       }
     }

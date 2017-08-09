@@ -1,6 +1,5 @@
 import BaseAdapter from './base-adapter';
 import Util from './../util';
-import Gun from 'gun/gun';
 
 export default class KeyValAdapter extends BaseAdapter {
 
@@ -51,7 +50,7 @@ export default class KeyValAdapter extends BaseAdapter {
                     let node = { state, field, key };
 
                     // Add rel or val
-                    if (Gun.obj.is(nodeDelta[field])) {
+                    if (this.Gun.obj.is(nodeDelta[field])) {
                         node.rel = nodeDelta[field]['#'];
                     } else {
                         node.val = nodeDelta[field]; 

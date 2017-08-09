@@ -30,6 +30,7 @@ describe('NodeAdapter: interface spec', function () {
                 
             }
         });
+        adapter.Gun = require('gun/gun');
         adapter._write(put);
     });
 
@@ -73,6 +74,7 @@ describe('NodeAdapter: interface spec', function () {
                 }
             }
         });
+        adapter.Gun = require('gun/gun');
 
         // run
         adapter._write(put);

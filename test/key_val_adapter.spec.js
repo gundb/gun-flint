@@ -2,6 +2,7 @@ import { describe, it, beforeEach } from 'mocha';
 import assert from 'assert';
 import { KeyValAdapter } from './../src/index'; 
 import testData from './test_data';
+import Gun from 'gun/gun';
 
 const put = testData.default.put;
 const get = testData.default.get;
@@ -29,6 +30,7 @@ describe('KeyValAdapter: interface spec', function () {
                 done();
             }
         });
+        adapter.Gun = Gun;
 
         // run
         adapter._write(put);

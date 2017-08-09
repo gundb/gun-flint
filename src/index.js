@@ -23,7 +23,8 @@ import Util from './util';
 // Flint
 const flint = {
   register: function(extension = null) {
-    if (!extension || !(extension instanceof BaseExtension)) {
+    // if (!extension || !(extension instanceof BaseExtension)) {
+    if (!extension) {
       throw "Flint.register requires an instance that extends BaseExtension.";
     }
     extension.bootstrap();

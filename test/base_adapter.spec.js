@@ -69,10 +69,14 @@ describe('BaseAdapter: dedup writes after gets', function () {
     });
 
     it('should not allow something with registered dedup to be written', done => {
+
         // setup state
         let adapter = new BaseAdapter.default({});
         adapter.write = () => {
             throw "PUT has been called even though it would allow a duplicate to be written";
+        };
+        adapter.context = {
+            on: function() {}
         };
         adapter._recordGet(put['@']);
         adapter._recordGet(put['@']);
@@ -86,6 +90,9 @@ describe('BaseAdapter: dedup writes after gets', function () {
     it('should allow something without registered dedup to be written', done => {
         // prepare
         let adapter = new BaseAdapter.default({});
+        adapter.context = {
+            on: function() {}
+        };
         let writeAttempts = 0;
         adapter._recordGet('some_random_dedup');
         adapter._recordGet(put['@']);

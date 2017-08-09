@@ -51,7 +51,7 @@ describe('Flint Integration Suite:', function() {
             $focus.put(focus.val);
             $ford.put(ford.val);
 
-            $make = getGun().get(focusKey).get('make');
+            let $make = getGun().get(focusKey).get('make');
             $make.put($ford);
 
             let target = Object.keys(ford.val).length;

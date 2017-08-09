@@ -1,4 +1,4 @@
-const {NodeAdapter} = require('./../../dist/index');
+const {NodeAdapter} = require('./../../src/index');
 
 module.exports = new NodeAdapter({
     opt: function(context, option) {

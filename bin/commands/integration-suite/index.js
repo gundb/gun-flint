@@ -1,5 +1,4 @@
 module.exports = function(finished, Adapter, opt) {
-
     const path = require('path');
     const Mocha = require('mocha');
     const fs = require('fs');

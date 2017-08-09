@@ -1,3 +1,4 @@
+require('babel-register');
 const Command = require('./../base/Command');
 const path = require('path');
 const integrationSuite = require('./integration-suite/index');

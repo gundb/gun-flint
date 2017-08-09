@@ -1,4 +1,4 @@
-const {KeyValAdapter} = require('./../../dist/index');
+const {KeyValAdapter} = require('./../../src/index');
 
 module.exports = new KeyValAdapter({
     opt: function(context, option) {

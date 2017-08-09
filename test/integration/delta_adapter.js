@@ -1,5 +1,5 @@
 
-const {DeltaAdapter, Util} = require('./../../dist/index');
+const {DeltaAdapter, Util} = require('./../../src/index');
 
 module.exports = new DeltaAdapter({
     opt: function(context, option) {

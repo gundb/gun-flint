@@ -1,7 +1,7 @@
 
 const assert = require('assert');
 
-describe("Flint Integration Suite", function() {
+describe("Flint Integration Suite:", function() {
     describe("-- GET --", function() {
 
         // Set default timeout

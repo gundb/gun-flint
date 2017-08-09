@@ -93,36 +93,32 @@ describe('Flint Integration Suite:', function() {
             var finished = false;
             var vwTarget = Object.keys(vw.val).length;
             var bmwTarget = Object.keys(bmw.val).length;
+
+            let $manufacturers = getGun().get(germanyKey).get('manufacturers');
+            $manufacturers.set($vw);
+            $manufacturers.set($bmw);
             setTimeout(() => {
-
-                let $manufacturers = getGun().get(germanyKey).get('manufacturers');
-                $manufacturers.set($vw);
-                $manufacturers.set($bmw);
-                setTimeout(() => {
-                    let $manufacturers = getGun().get(germanyKey).get('manufacturers');
-                    $manufacturers.on((maker, key) => {
-                        console.log({maker, key});
-                        
-                        var makerPropCount = Object.keys(maker).length;
-                        if (key === vwKey) {
-                            if (makerPropCount === vwTarget) {
-                                count++;
-                                assert.deepStrictEqual(maker, vw.val);
-                            }
-                        } else if (key === bmwKey) {
-                            if (makerPropCount === bmwKey) {
-                                count++;
-                                assert.deepStrictEqual(maker, bmw.val);
-                            }
+                getGun().get(germanyKey).get('manufacturers').map().on((maker, key) => {
+                    delete maker._;
+                    var makerPropCount = Object.keys(maker).length;
+                    if (key === vwKey) {
+                        if (makerPropCount === vwTarget) {
+                            count++;
+                            assert.deepStrictEqual(maker, vw.val);
                         }
-
-                        if (!finished && count === 1) {
-                            finished = true;
-                            done();
+                    } else if (key === bmwKey) {
+                        if (makerPropCount === bmwKey) {
+                            count++;
+                            assert.deepStrictEqual(maker, bmw.val);
                         }
-                    });
-                }, 500);
-            }, 1000);           
+                    }
+
+                    if (!finished && count === 1) {
+                        finished = true;
+                        done();
+                    }
+                });
+            }, 500);        
         });
 
     });

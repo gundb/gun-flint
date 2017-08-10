@@ -51,6 +51,9 @@ export default class BaseAdapter extends BaseExtension {
         this._get = adapter.get ? adapter.get.bind(this.outerContext) : Util.noop;
         this._put = adapter.put ? adapter.put.bind(this.outerContext) : Util.noop;
 
+        // Add reference to GUN constructor
+        this.outerContext.Gun = this.Gun;
+
         // Bind all adapter methods to the outer context
         for (let methodName in adapter) {
             if ({}.hasOwnProperty.call(adapter, methodName)
@@ -95,8 +98,8 @@ export default class BaseAdapter extends BaseExtension {
      * 
      * @public
      */
-    bootstrap() {
-        this.Gun = require('gun/gun');
+    bootstrap(Gun) {
+        this.Gun = Gun || require('gun/gun');
 
         if (!this.Gun) {
             throw "Unable to retrieve a Gun instance. This is probably because you tried to import Gun after this Gun adapter. Makes sure that you import all adapter after you've imported Gun.";
@@ -280,6 +283,10 @@ export default class BaseAdapter extends BaseExtension {
         if (this._shouldWrite(context['@'])) {
             // Pass to child implementation
             return this.write(delta, this.afterWrite.bind(this, dedupId));
+        } else {
+
+            // Acknowledge write
+            this.afterWrite(dedupId, null);
         }
     }
 

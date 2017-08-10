@@ -34,14 +34,14 @@ export default {
           node._['>'][val.field] = val.state;
 
           // relation
-          if (val.rel) {
+          if (Object.keys(val).indexOf('rel') !== -1) {
             node[val.field] = {
               '#': val.rel
             }
           } else {
 
             // value
-            node[val.field] = !isNil(val.val) ? val.val : ""
+            node[val.field] = Object.keys(val).indexOf('val')? val.val : null;
           }
       }
 

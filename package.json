@@ -2,13 +2,6 @@
   "name": "gun-flint",
   "version": "0.0.13",
   "description": "Micro-framework for building Gun adapters",
-  "main": "dist/index.js",
-  "scripts": {
-    "test": "mocha test/ --opts ./mocha.opts",
-    "lint": "eslint src/",
-    "build": "babel src/ -d dist/",
-    "prepublish": "npm test && npm run build"
-  },
   "keywords": [
     "gun",
     "gundb",
@@ -16,8 +9,23 @@
   ],
   "author": "sjones6",
   "license": "MIT",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "mocha test/ --opts ./mocha.opts",
+    "test:integrations": "npm run test:node && npm run test:delta",
+    "test:delta": "flint test ./test/integration/delta_adapter.js --opt=./test/integration/flint-opt.js",
+    "test:node": "flint test ./test/integration/node_adapter.js --opt=./test/integration/flint-opt.js",
+    "mocha": "mocha",
+    "lint": "eslint src/",
+    "build": "babel src/ -d dist/",
+    "prepublish": "npm test && npm run build"
+  },
+  "bin": {
+    "flint": "bin/flint.js"
+  },
   "dependencies": {
-    "babel-runtime": "^6.11.6"
+    "babel-runtime": "^6.11.6",
+    "minimist": "^1.2.0"
   },
   "devDependencies": {
     "babel-cli": "^6.11.4",

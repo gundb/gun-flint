@@ -23,22 +23,23 @@ module.exports = new KeyValAdapter({
             })
         } else {
 
-            // Retrieve an entire node. First look up the key:field index
+            // Retrieve an entire node. First look up the node's key list
+            // and find the keys for all key_fields.
             this.mem.get(key, (err, result) => {
                 if (!err && !result || err && /(NotFound|not found|not find)/i.test(err.message)) {
                     done(this.errors.lost)
                 } else if (err) {
                     done(this.errors.internal);
                 } else {
-                    var fieldKeys = JSON.parse(result);
+                    var fieldKeys = result.split(',');
                     fieldKeys.forEach(fieldKey => {
                         this.mem.get(fieldKey, (error, keyVal) => {
-                            if (!err && !keyVal || err && /(NotFound|not found|not find)/i.test(err.message)) {
+                            if (!error && !keyVal || error && /(NotFound|not found|not find)/i.test(error.message)) {
                                 done(this.errors.lost)
-                            } else if (err) {
+                            } else if (error) {
                                 done(this.errors.internal);
                             } else {
-                                done(null, JSON.parse(keyVal))
+                                done(null, JSON.parse(keyVal));
                             }
                         });
                     });
@@ -52,7 +53,7 @@ module.exports = new KeyValAdapter({
         let keys = {};
         batch.forEach(node => {
             let key = keyField(node.key, node.field);
-            writer.put(key, node);
+            writer.put(key, JSON.stringify(node));
 
             if (!keys[node.key]) {
                 keys[node.key] = [];
@@ -62,10 +63,11 @@ module.exports = new KeyValAdapter({
 
         // Write once all nodes processed
         let target = Object.keys(keys).length;
+        let count = 0;
         let writeWhenReady = () => {
             count++;
             if (count === target) {
-                write.write(err => {
+                writer.write(err => {
                     if (err) {
                         done(this.errors.internal)
                     } else {
@@ -79,16 +81,16 @@ module.exports = new KeyValAdapter({
             let merged = existing;
             newKeys.forEach(newKey => {
                 if (existing.indexOf(newKey) === -1) {
-                    merge.push(newKey);
+                    merged.push(newKey);
                 }
             });
-            writer.put(nodeKey, JSON.stringify(merged));
+            writer.put(nodeKey, merged);
             writeWhenReady();
         };
 
         Object.keys(keys).forEach(nodeKey => {
             this.mem.get(nodeKey, (err, keyList) => {
-                keyList = keyList ? JSON.parse(keyList) : [];
+                keyList = keyList ? keyList.split(',') : [];
                 mergeKeys(nodeKey, keyList, keys[nodeKey]);
             });
         });

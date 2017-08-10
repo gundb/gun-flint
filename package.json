@@ -42,6 +42,6 @@
     "mocha": "^3.0.0"
   },
   "peerDependencies": {
-    "gun": "^0.8.0"
+    "gun": "^0.8.3"
   }
 }

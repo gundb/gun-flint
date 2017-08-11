@@ -28,7 +28,7 @@ Cons:
 * Slower performance (requires a read > merge for every write); this is especially problematic if your data requires large nodes (e.g., a `users` node with millions of `user`s)
 * Large nodes could overwhelm memory and cause crashes; if you anticipate this, consider [Key:Value](https://github.com/sjones6/gun-flint/blob/master/docs/KEY_VAL_ADAPTER.MD) storage with streaming.
 
-**When to Use:** Most/all nodes are small; optimal for document-based databases (e.g., MongoDB; Postgres)
+**When to Use:** Most/all nodes are small; nodes are frequently created; optimal for document-based databases (e.g., MongoDB; Postgres)
 
 Example: [gun-mongo](https://github.com/sjones6/gun-mongo)
 
@@ -45,9 +45,9 @@ Cons:
 * Every key:value pair (node property) would presumably require a separate record in storage (although not necessarily)
 * Read requests require retrieval of multiple records
 
-**When to Use:** Nodes are small/medium in size; optimal for SQL databases (MySQL, MSSql)
+**When to Use:** Nodes are small/medium in size; some large nodes; nodes are frequently updated
 
-Example: [gun-mysql](https://github.com/sjones6/gun-mysql)
+Example: [gun-mongo-key](https://github.com/sjones6/gun-mongo-key)
 
 ### [Delta Storage](https://github.com/sjones6/gun-flint/blob/master/docs/DELTA_ADAPTER.MD)
 
@@ -104,6 +104,10 @@ var gun = new Gun({
     }
 });
 ```
+
+# Testing Your Adapter
+
+Flint comes packaged with an integration testing suite. See [full documentation here](https://github.com/sjones6/gun-flint/blob/master/docs/INTEGRATION_TESTING.MD).
 
 # Troubleshooting
 

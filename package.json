@@ -17,10 +17,11 @@
     "test:delta": "node ./bin/flint.js test ./test/integration/delta_adapter.js --opt=./test/integration/flint-opt.js",
     "test:node": "node ./bin/flint.js test ./test/integration/node_adapter.js --opt=./test/integration/flint-opt.js",
     "test:key_val": "node ./bin/flint.js test ./test/integration/key_val_adapter.js --opt=./test/integration/flint-opt.js",
+    "package:gun": "rm -Rf ./bin/commands/integration-suite/gun && mkdir ./bin/commands/integration-suite/gun && cp -Rf ./node_modules/gun/* ./bin/commands/integration-suite/gun",
     "mocha": "mocha",
     "lint": "eslint src/",
     "build": "babel src/ -d dist/",
-    "prepublish": "npm test && npm run build"
+    "prepublish": "npm run package:gun && npm test && npm run build"
   },
   "bin": {
     "flint": "bin/flint.js"

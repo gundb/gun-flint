@@ -1,0 +1,65 @@
+{
+  "name": "gun",
+  "version": "0.8.3",
+  "description": "Graph engine",
+  "main": "index.js",
+  "browser": "gun.min.js",
+  "scripts": {
+    "start": "node examples/http.js 8080",
+    "prepublish": "npm run unbuild",
+    "test": "mocha",
+    "e2e": "mocha e2e/distributed.js",
+    "docker": "hooks/build",
+    "unbuild": "node lib/unbuild.js && uglifyjs gun.js -o gun.min.js -c -m"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amark/gun.git"
+  },
+  "keywords": [
+    "gun",
+    "gunDB",
+    "graph",
+    "document",
+    "key",
+    "value",
+    "relational",
+    "datastore",
+    "database",
+    "engine",
+    "realtime",
+    "decentralized",
+    "peer-to-peer",
+    "distributed",
+    "P2P",
+    "OSS",
+    "embedded",
+    "localstorage",
+    "S3"
+  ],
+  "author": "Mark Nadal",
+  "license": "(Zlib OR MIT OR Apache-2.0)",
+  "bugs": {
+    "url": "https://github.com/amark/gun/issues"
+  },
+  "homepage": "https://github.com/amark/gun#readme",
+  "engines": {
+    "node": ">=0.6.6"
+  },
+  "dependencies": {
+    "aws-sdk": ">=2.41.0",
+    "formidable": ">=1.1.1",
+    "ws": "~>2.2.3"
+  },
+  "devDependencies": {
+    "uws": "~>0.14.1",
+    "express": ">=4.15.2",
+    "hapi": "^16.1.1",
+    "inert": "^4.2.0",
+    "ip": "^1.1.5",
+    "mocha": ">=3.2.0",
+    "panic-manager": "^1.2.0",
+    "panic-server": "^1.1.0",
+    "uglify-js": ">=2.8.22"
+  }
+}

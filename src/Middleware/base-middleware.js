@@ -1,8 +1,6 @@
 import BaseExtension from './../base-extension';
 import Util from './../util';
 
-import Gun from 'gun/gun';
-
 export default class BaseMiddleware extends BaseExtension {
 
     constructor(middleware) {
@@ -32,9 +30,10 @@ export default class BaseMiddleware extends BaseExtension {
         return this;
     }
 
-    bootstrap() {
+    bootstrap(Gun) {
         const _this = this;
-        Gun.on('opt', function(context) {
+        this.Gun = Gun || require('gun/gun');
+        this.Gun.on('opt', function(context) {
             this.to.next(context);
             _this._opt.call(this.outerContext, context, context.opt, !context.once);
 

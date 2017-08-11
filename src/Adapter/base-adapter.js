@@ -2,6 +2,7 @@ import BaseExtension from './../base-extension';
 import AdapterContext from './adapter-context';
 import BaseMixin from './../Mixin/base-mixin';
 import Util from './../util';
+import union from './union';
 
 /**
  * The base class for all adapters
@@ -51,9 +52,6 @@ export default class BaseAdapter extends BaseExtension {
         this._get = adapter.get ? adapter.get.bind(this.outerContext) : Util.noop;
         this._put = adapter.put ? adapter.put.bind(this.outerContext) : Util.noop;
 
-        // Add reference to GUN constructor
-        this.outerContext.Gun = this.Gun;
-
         // Bind all adapter methods to the outer context
         for (let methodName in adapter) {
             if ({}.hasOwnProperty.call(adapter, methodName)
@@ -96,10 +94,11 @@ export default class BaseAdapter extends BaseExtension {
      * @instance
      * @public
      * 
-     * @public
+     * @param {Gun} Gun    The Gun constructor
      */
     bootstrap(Gun) {
         this.Gun = Gun || require('gun/gun');
+        this.outerContext.Gun = Gun;
 
         if (!this.Gun) {
             throw "Unable to retrieve a Gun instance. This is probably because you tried to import Gun after this Gun adapter. Makes sure that you import all adapter after you've imported Gun.";

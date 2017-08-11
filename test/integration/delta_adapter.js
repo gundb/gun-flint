@@ -1,5 +1,6 @@
 
-const {DeltaAdapter, Util} = require('./../../src/index');
+const {DeltaAdapter} = require('./../../src/index');
+const union = require('./../../src/Adapter/union');
 
 module.exports = new DeltaAdapter({
     opt: function(context, option) {
@@ -14,7 +15,7 @@ module.exports = new DeltaAdapter({
             } else {
                 let node = JSON.parse(res);
                 if (field) {
-                    done(null, Gun.state.to(node, field));
+                    done(null, this.Gun.state.to(node, field));
                 } else {
                     done(null, node);
                 }
@@ -38,7 +39,7 @@ module.exports = new DeltaAdapter({
             let node = delta[key];
             this.get(key, null, (err, res) => {
                 if (res) {
-                    node = Util.union(node, res)
+                    node = union(this.Gun, node, res)
                 }
                 this.mem.put(key, JSON.stringify(node), finished);
             });

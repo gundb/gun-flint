@@ -1,4 +1,4 @@
-module.exports = function(finished, Adapter, opt) {
+module.exports = function(finished, args, Adapter, opt) {
     const path = require('path');
     const Mocha = require('mocha');
     const fs = require('fs');
@@ -7,9 +7,17 @@ module.exports = function(finished, Adapter, opt) {
     opt = opt || {};
     opt.file = false;
     
-    // Set a few globals (can this be done another way??)
-    global.Gun = require('gun/gun');
+    const gunPath = args['skip-packaged-gun'] ? 'gun/gun' : './gun/gun';
+    global.Gun = require(gunPath);
+
+    // Gun not found. Error out
+    if (!global.Gun) {
+        throw "GUN NOT FOUND! Unable to continue integration tests. If using the --skip-packaged-gun flag, be sure that gun is available included in node modules.";
+    }
+
     Adapter.bootstrap(global.Gun);
+
+    // Set a few globals (can this be done another way!?)
     global.Adapter = Adapter;
     global.opt = opt;
     global.data = require('./data');
@@ -48,34 +56,7 @@ module.exports = function(finished, Adapter, opt) {
 
     // Run the tests.
     let runner = mocha.run();
-
-    /*
-    *   - `start`  execution started
-    *   - `end`  execution complete
-    *   - `suite`  (suite) test suite execution started
-    *   - `suite end`  (suite) all tests (and sub-suites) have finished
-    *   - `test`  (test) test execution started
-    *   - `test end`  (test) test completed
-    *   - `hook`  (hook) hook execution started
-    *   - `hook end`  (hook) hook complete
-    *   - `pass`  (test) test passed
-    *   - `fail`  (test, err) test failed
-    *   - `pending`  (test) test pending
-    */
     runner.on('end', () => {
         finished();
     });
-    // .on('start', () => {
-    //     console.log('TESTING STARTED');
-    // })
-    
-    // .on('pass', test => {
-    //     console.log('.');
-    // })
-    // .on('fail', (test) => {
-    //     console.log('F');
-    // })
-    // .on('suite end', suite => {
-    //     console.log("INTEGRATION SUITE FINISHED");
-    // });
 }

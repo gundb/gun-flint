@@ -1,7 +1,7 @@
 import Util from './../util';
 import BaseAdapter from './base-adapter';
 import AdapterContext from './adapter-context';
-
+import union from './union';
 
 /**
  * Read/write hooks for the node adapter
@@ -11,6 +11,19 @@ import AdapterContext from './adapter-context';
  * @class
  */
 export default class Adapter extends BaseAdapter {
+
+  /**
+   * @override
+   * @instance
+   * @public
+   * 
+   * @param {Gun} Gun   The Gun constructor 
+   */
+  bootstrap(Gun) {
+    super.bootstrap(Gun);
+
+    this._union = union.bind(this, Gun);
+  }
 
   /**
    * @override
@@ -57,7 +70,7 @@ export default class Adapter extends BaseAdapter {
       // Merge the delta with existing node
       let errorOk = !err || err.code() === 400;
       if (errorOk && node && existing) {  
-        node = Util.union(node, existing);
+        node = this._union(node, existing);
       }
 
       // Write merged node to storage

@@ -19,7 +19,8 @@ ${TestAdapter.describe()}
 Commant: flint test relative/path/to/adapter
 
 Options:
-    --opt="relative/path/to/options.js"  (optional)
+    --opt="relative/path/to/options.js"  optional, but required if adapter requires options to instantiate
+    --skip-packaged-gun                  Don't use the Gun version packaged with flint; gun is available as a npm module (e.g., require('gun/gun'))
 `;
     }
 
@@ -35,7 +36,7 @@ Options:
                     resolve();
                 }
             }
-            let integration = integrationSuite.bind(this, done);
+            let integration = integrationSuite.bind(this, done, this.args);
 
             // Ensure the path to the adapter is given
             let adapterPath = this.args._[3];
@@ -59,11 +60,11 @@ Options:
                 try {
                     opt = require(path.join(process.cwd(), this.args.opt));
                 } catch (e) {
-                    reject(new Error(`Unable to find the adapter options in order to run integration tests. Ensure that relative path the options are given: 'flint test ./relative/path/to/adapter --opt="./relative/path/to/opt.js'.`));
+                    reject(new Error(`Unable to find the adapter OPTIONS in order to run integration tests. Ensure that relative path the options are given: 'flint test ./relative/path/to/adapter --opt="./relative/path/to/opt.js'.`));
                 }
             
                 if (!opt) {
-                    throw `Adapter options not found at ${path.join(process.cwd(), this.args.opt)}`
+                    throw `Adapter OPTIONS not found at ${path.join(process.cwd(), this.args.opt)}`
                 } else if (opt instanceof Promise) {
                     opt
                         .then(realOpt => integration(Adapter, opt))
@@ -73,7 +74,6 @@ Options:
                 } else {
                     integration(Adapter, opt);
                 }
-
             } else {
                 integration(Adapter);
             }

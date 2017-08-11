@@ -1,6 +1,6 @@
 import { describe, it, beforeEach } from 'mocha';
 import assert from 'assert';
-import { NodeAdapter, Util } from './../src/index'; 
+import { NodeAdapter } from './../src/index'; 
 import testData from './test_data';
 
 const put = testData.default.put;
@@ -65,7 +65,7 @@ describe('NodeAdapter: interface spec', function () {
                 getDone(null, union[key]);
             },
             put: (key, node, putDone) => {
-                assert.deepStrictEqual(node, Util.union(union[key], put.put[key]));
+                assert.deepStrictEqual(node, adapter._union(union[key], put.put[key]));
                 
                 // Ensure that all nodes are put before calling `done`
                 handled++;
@@ -74,7 +74,7 @@ describe('NodeAdapter: interface spec', function () {
                 }
             }
         });
-        adapter.Gun = require('gun/gun');
+        adapter.bootstrap(require('gun/gun'));
 
         // run
         adapter._write(put);

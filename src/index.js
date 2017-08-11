@@ -6,12 +6,6 @@ import DeltaAdapter from './Adapter/delta-adapter';
 import KeyValAdapter from './Adapter/key-val-adapter';
 import NodeAdapter from './Adapter/node-adapter';
 
-// Plugins
-import Plugin from './Plugin/base-plugin';
-
-// Middleware
-import Middleware from './Middleware/base-middleware';
-
 // Bundles Mixins
 import BaseMixin from './Mixin/base-mixin';
 import ProfilerMixin from './Mixin/ProfilerMixin';
@@ -32,8 +26,6 @@ const flint = {
   DeltaAdapter,
   NodeAdapter,
   KeyValAdapter,
-  Plugin,
-  Middleware,
   BaseMixin,
   Mixins: {
     BaseMixin,

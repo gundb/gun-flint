@@ -99,6 +99,11 @@ module.exports = function(finished, args, Adapter, opt) {
         let nodeKeys = Object.keys(node);
         for (var i = 0; i < target; i++) {
             $gun.get(ring.make(i)).on(val => {
+                
+                // remove metadata
+                delete val._;
+
+                // Check for node completeness
                 if (Object.keys(val).length === nodeKeys.length) {
                     res.ack();
                 }
@@ -110,10 +115,21 @@ module.exports = function(finished, args, Adapter, opt) {
     let upsert = function() {
         let $gun = getGun();
         let target = 10000;
-        let res = ack(`Update ${target} nodes: `, target, allDone);
+        let res = ack(`Update ${target} nodes: `, target, updateSingleProperty);
         let ring = key(keyBase);
         for (var i = 0; i < target; i++) {
             $gun.get(ring.make(i)).put(getNode(), res.ack);
+        }
+    }
+
+    // Update 10K nodes
+    let updateSingleProperty = function() {
+        let $gun = getGun();
+        let target = 10000;
+        let res = ack(`Update single field on ${target} nodes: `, target, allDone);
+        let ring = key(keyBase);
+        for (var i = 0; i < target; i++) {
+            $gun.get(ring.make(i)).put({one: 'two'}, res.ack);
         }
     }
 

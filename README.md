@@ -109,6 +109,10 @@ var gun = new Gun({
 
 Flint comes packaged with an integration testing suite. See [full documentation here](https://github.com/sjones6/gun-flint/blob/master/docs/INTEGRATION_TESTING.MD).
 
+# Performance Profiling
+
+Flint comes packaged with an performance suite that will run against your adapter. See [full documentation here](https://github.com/sjones6/gun-flint/blob/master/docs/PERFORMANCE_TESTING.MD).
+
 # Troubleshooting
 
 If your adapter's `opt` function is never called, or when it is called, it doesn't have options that you passed to the constructor, here are some steps:

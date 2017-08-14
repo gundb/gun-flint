@@ -7,7 +7,7 @@ module.exports = function(finished, args, Adapter, opt) {
     opt = opt || {};
     opt.file = false;
     
-    const gunPath = args['skip-packaged-gun'] ? 'gun/gun' : './gun/gun';
+    const gunPath = args['skip-packaged-gun'] ? 'gun/gun' : './../gun/gun';
     global.Gun = require(gunPath);
 
     // Gun not found. Error out

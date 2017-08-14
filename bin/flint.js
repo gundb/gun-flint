@@ -56,6 +56,7 @@ if (!command || command === 'list') {
             process.exit();
         })
         .catch(e => {
+            console.error(e);
             console.error(`ERR!! Received error running 'flint ${command}'.`);
             process.exit();
         });

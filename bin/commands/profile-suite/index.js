@@ -64,6 +64,10 @@ module.exports = function(finished, args, Adapter, opt) {
         ack.ack = function() {
             ack.count++;
 
+            if ((ack.count % 100) === 0) {
+                console.log(ack.count);
+            }
+
             if (ack.count === ack.target) {
                 ack.done();
             } 
@@ -78,82 +82,181 @@ module.exports = function(finished, args, Adapter, opt) {
         return ack;
     }
 
-    // Write 10K nodes
-    let profileWrite = function() {
-        let $gun = getGun();
-        let target = 10000;
-        let res = ack(`Write ${target} nodes: `, target, profileRead);
-        let ring = key(keyBase);
-        for (var i = 0; i < target; i++) {
-            $gun.get(ring.make(i)).put(getNode(), res.ack);
-        }
+    
+
+    let smallSequence = function() {
+        // console.log("__ SMALL NODES: 10 Properties Each ___");
+
+        // // Write 10K nodes
+        // let profileWrite = function() {
+        //     let $gun = getGun();
+        //     let target = 10000;
+        //     let res = ack(`Write ${target} nodes: `, target, profileRead);
+        //     let ring = key(keyBase);
+        //     for (var i = 0; i < target; i++) {
+        //         $gun.get(ring.make(i)).put(getNode(), res.ack);
+        //     }
+        // }
+
+        // // Write 10K nodes
+        // let profileRead = function() {
+        //     let $gun = getGun();
+        //     let target = 10000;
+        //     let res = ack(`Read ${target} nodes: `, target, upsert);
+        //     let ring = key(keyBase);
+        //     let node = getNode();
+        //     let nodeKeys = Object.keys(node);
+        //     for (var i = 0; i < target; i++) {
+        //         $gun.get(ring.make(i)).on(val => {
+                    
+        //             // remove metadata
+        //             delete val._;
+
+        //             // Check for node completeness
+        //             if (Object.keys(val).length === nodeKeys.length) {
+        //                 res.ack();
+        //             }
+        //         });
+        //     }
+        // }
+
+        // // Update 10K nodes
+        // let upsert = function() {
+        //     let $gun = getGun();
+        //     let target = 10000;
+        //     let res = ack(`Update ${target} nodes: `, target, updateSingleProperty);
+        //     let ring = key(keyBase);
+        //     for (var i = 0; i < target; i++) {
+        //         $gun.get(ring.make(i)).put(getNode(), res.ack);
+        //     }
+        // }
+
+        // // Update 10K nodes
+        // let updateSingleProperty = function() {
+        //     let $gun = getGun();
+        //     let target = 10000;
+        //     let res = ack(`Update single field on ${target} nodes: `, target, mediumSequence);
+        //     let ring = key(keyBase);
+        //     for (var i = 0; i < target; i++) {
+        //         $gun.get(ring.make(i)).put({one: 'two'}, res.ack);
+        //     }
+        // }
+
+        // Read 10K node fields
+        // let readFields = function() {
+        //     let $gun = getGun();
+        //     let target = 10000;
+        //     let res = ack(`Read ${target} nodes: `, target, mediumSequence);
+        //     let ring = key(keyBase);
+        //     let node = getNode();
+        //     for (var i = 0; i < target; i++) {
+        //         $gun.get(ring.make(i)).get('six').on(val => {
+        //             if (val.six === 'six') {
+        //                 console.log(val);
+        //                 res.ack();
+        //             }
+        //         });
+        //     }
+        // }
+
+        // Start the sequence
+        profileWrite();
     }
 
-    // Write 10K nodes
-    let profileRead = function() {
-        let $gun = getGun();
-        let target = 10000;
-        let res = ack(`Read ${target} nodes: `, target, upsert);
-        let ring = key(keyBase);
-        let node = getNode();
-        let nodeKeys = Object.keys(node);
-        for (var i = 0; i < target; i++) {
-            $gun.get(ring.make(i)).on(val => {
-                
-                // remove metadata
-                delete val._;
+    let mediumSequence = function() {
+        console.log("__ MEDIUM NODES: 1000 Properties Each ___");
+        let target = 1000;
 
-                // Check for node completeness
-                if (Object.keys(val).length === nodeKeys.length) {
-                    res.ack();
+        let node;
+        let getMediumNode = function() {
+            if (!node) {
+                node = {};
+                let keyPrefix = "prop";
+                let val = "medium_property"
+                for (var i = 0; i < 1000; i++) {
+                    node[`${keyPrefix}_${i}`] = val;
                 }
-            });
+            }
+            return node;
+        };
+
+
+        let profileWrite = function() {
+            let $gun = getGun();
+            let res = ack(`Write ${target} nodes: `, target, profileRead);
+            let ring = key(keyBase + "_MEDIUM");
+            for (var i = 0; i < target; i++) {
+                $gun.get(ring.make(i)).put(getMediumNode(), res.ack);
+            }
         }
+
+        // Write 10K nodes
+        let profileRead = function() {
+            let $gun = getGun();
+            let res = ack(`Read ${target} nodes: `, target, upsert);
+            let ring = key(keyBase + "_MEDIUM");
+            let node = getMediumNode();
+            let nodeKeys = Object.keys(node);
+            for (var i = 0; i < target; i++) {
+                $gun.get(ring.make(i)).on(val => {
+                    
+                    // remove metadata
+                    delete val._;
+                    console.log(Object.keys(val).length);
+                    // Check for node completeness
+                    if (Object.keys(val).length === nodeKeys.length) {
+                        res.ack();
+                    }
+                });
+            }
+        }
+
+        // Update 10K nodes
+        let upsert = function() {
+            let $gun = getGun();
+            let res = ack(`Update ${target} nodes: `, target, updateSingleProperty);
+            let ring = key(keyBase + "_MEDIUM");
+            for (var i = 0; i < target; i++) {
+                $gun.get(ring.make(i)).put(getMediumNode(), res.ack);
+            }
+        }
+
+        // Update 10K nodes
+        let updateSingleProperty = function() {
+            let $gun = getGun();
+            let res = ack(`Update single field on ${target} nodes: `, target, allDone);
+            let ring = key(keyBase  + "_MEDIUM");
+            for (var i = 0; i < target; i++) {
+                $gun.get(ring.make(i)).put({one: 'two'}, res.ack);
+            }
+        }
+
+        // Read 10K node fields
+        // let readFields = function() {
+        //     let $gun = getGun();
+        //     let res = ack(`Read ${target} nodes: `, target, allDone);
+        //     let ring = key(keyBase);
+        //     let node = getMediumNode();
+        //     for (var i = 0; i < target; i++) {
+        //         $gun.get(ring.make(i)).get('six').on(val => {
+        //             if (val.six === 'six') {
+        //                 res.ack();
+        //             }
+        //         });
+        //     }
+        // }
+
+        // start the chain
+        profileWrite();
     }
 
-    // Update 10K nodes
-    let upsert = function() {
-        let $gun = getGun();
-        let target = 10000;
-        let res = ack(`Update ${target} nodes: `, target, updateSingleProperty);
-        let ring = key(keyBase);
-        for (var i = 0; i < target; i++) {
-            $gun.get(ring.make(i)).put(getNode(), res.ack);
-        }
-    }
-
-    // Update 10K nodes
-    let updateSingleProperty = function() {
-        let $gun = getGun();
-        let target = 10000;
-        let res = ack(`Update single field on ${target} nodes: `, target, allDone);
-        let ring = key(keyBase);
-        for (var i = 0; i < target; i++) {
-            $gun.get(ring.make(i)).put({one: 'two'}, res.ack);
-        }
-    }
-
-    // Read 10K node fields
-    // let readFields = function() {
-    //     let $gun = getGun();
-    //     let target = 10000;
-    //     let res = ack(`Read ${target} nodes: `, target, allDone);
-    //     let ring = key(keyBase);
-    //     let node = getNode();
-    //     for (var i = 0; i < target; i++) {
-    //         $gun.get(ring.make(i)).get('six').on(val => {
-    //             if (val.six === 'six') {
-    //                 res.ack();
-    //             }
-    //         });
-    //     }
-    // }
+    
 
     let allDone = function() {
         console.log("Profile finished");
         finished();
     }
 
-    profileWrite();
+    mediumSequence();
 
 }

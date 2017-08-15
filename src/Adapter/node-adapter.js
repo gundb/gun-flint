@@ -22,7 +22,7 @@ export default class Adapter extends BaseAdapter {
   bootstrap(Gun) {
     super.bootstrap(Gun);
 
-    this._union = union.bind(this, Gun);
+    this._union = union.bind(this, this.Gun);
   }
 
   /**

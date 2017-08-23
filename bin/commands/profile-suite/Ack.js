@@ -11,7 +11,7 @@ module.exports = class Ack {
     ack(res) {
         if (res && res.err) {
             console.log({err: res.err});
-            ack.errCount++;
+            this.errCount++;
         } else {
             this.count++;
         }

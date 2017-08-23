@@ -60,8 +60,8 @@ module.exports = function(finished, args, Adapter, opt) {
     }
 
     let runLarge = () => {
-        if (!args['skip-medium']) {
-            let large = new Profiler("__ Large Nodes: 10000 Properties Each __", getLargeNode(), 10000);
+        if (!args['skip-large']) {
+            let large = new Profiler("__ Large Nodes: 10000 Properties Each __", getLargeNode(), 100);
             large.run(opt, finished);
         } else {
             finished();
@@ -69,8 +69,10 @@ module.exports = function(finished, args, Adapter, opt) {
     }
 
     if (!args['skip-small']) {
-        let small = new Profiler("__ Small Nodes: 10 Properties Each __ ", getSmallNode(), 50);
+        let small = new Profiler("__ Small Nodes: 10 Properties Each __ ", getSmallNode(), 10000);
         small.run(opt, runMedium);
+    } else {
+        runMedium();
     }
 
 }

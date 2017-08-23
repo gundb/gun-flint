@@ -56,14 +56,16 @@ describe('Flint Integration Suite:', function() {
 
             let target = Object.keys(ford.val).length;
             let finished = false;
-            getGun().get(focusKey).get('make').on(make => {
-                delete make._;
-                if (!finished && Object.keys(make).length === target) {
-                    assert.deepStrictEqual(make, ford.val);
-                    finished = true;
-                    done();
-                }
-            });
+            setTimeout(function() {
+                getGun().get(focusKey).get('make').on(make => {
+                    delete make._;
+                    if (!finished && Object.keys(make).length === target) {
+                        assert.deepStrictEqual(make, ford.val);
+                        finished = true;
+                        done();
+                    }
+                });
+            }, 10);
         });
 
         it("should create sets", function(done) {

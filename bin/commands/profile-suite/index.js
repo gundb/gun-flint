@@ -39,17 +39,37 @@ module.exports = function(finished, args, Adapter, opt) {
         return node;
     };
 
+    let getLargeNode = function() {
+        let node = {};
+        let keyPrefix = "prop";
+        let val = "large_property"
+        for (var i = 0; i < 10000; i++) {
+            node[`${keyPrefix}_${i}`] = val;
+        }
+        return node;
+    };
+
+
     let runMedium = () => {
         if (!args['skip-medium']) {
             let medium = new Profiler("__ Medium Nodes: 1000 Properties Each __", getMediumNode(), 1000);
-            medium.run(opt, finished);
+            medium.run(opt, runLarge);
+        } else {
+            runLarge();
+        }
+    }
+
+    let runLarge = () => {
+        if (!args['skip-medium']) {
+            let large = new Profiler("__ Large Nodes: 10000 Properties Each __", getLargeNode(), 10000);
+            large.run(opt, finished);
         } else {
             finished();
         }
     }
 
     if (!args['skip-small']) {
-        let small = new Profiler("__ Small Nodes: 10 Properties Each __ ", getSmallNode(), 10000);
+        let small = new Profiler("__ Small Nodes: 10 Properties Each __ ", getSmallNode(), 50);
         small.run(opt, runMedium);
     }
 

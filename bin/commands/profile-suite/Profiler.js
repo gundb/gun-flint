@@ -19,6 +19,7 @@ let recurse = (target, callback, done) => {
 };
 
 let sequence = function(target, node, opt, allDone) {
+    let ring = new KeyRing(keyBase + "_MEDIUM");
 
     // An easy way to re-create gun as needed
     let __gun;
@@ -31,7 +32,6 @@ let sequence = function(target, node, opt, allDone) {
     let profileWrite = function() {
         getGun(function($gun) {
             let res = new Ack(`Write ${target} nodes: `);
-            let ring = new KeyRing(keyBase + "_MEDIUM");
             recurse(
                 target,
                 (i, next) => {
@@ -50,15 +50,14 @@ let sequence = function(target, node, opt, allDone) {
 
     // Write 10K nodes
     let profileRead = function() {
+        
         getGun(function($gun) {
             let res = new Ack(`Read ${target} nodes: `);
-            let ring = new KeyRing(keyBase + "_MEDIUM");
             let nodeKeys = Object.keys(node);
             recurse(
                 target,
                 (i, next) => {
                     $gun.get(ring.make(i)).on((val, key, ctx, at) => {
-                        
                         // remove metadata
                         delete val._;
                         // Check for node completeness
@@ -81,7 +80,6 @@ let sequence = function(target, node, opt, allDone) {
     let upsert = function() {
         getGun(function($gun) {
             let res = new Ack(`Update ${target} nodes: `);
-            let ring = new KeyRing(keyBase + "_MEDIUM");
             recurse(
                 target,
                 (i, next) => $gun.get(ring.make(i)).put(node, at => {
@@ -100,7 +98,6 @@ let sequence = function(target, node, opt, allDone) {
     let updateSingleProperty = function() {
         getGun(function($gun) {
             let res = new Ack(`Update single field on ${target} nodes: `);
-            let ring = new KeyRing(keyBase  + "_MEDIUM");
             recurse(
                 target,
                 (i, next) => $gun.get(ring.make(i)).put({one: 'two'}, at => {
@@ -119,7 +116,6 @@ let sequence = function(target, node, opt, allDone) {
     // let readFields = function() {
     //     getGun($gun => {
     //         let res = new Ack(`Read ${target} nodes: `);
-    //         let ring = new KeyRing(keyBase);
     //         let node = node;
     //         recurse(
     //             target,

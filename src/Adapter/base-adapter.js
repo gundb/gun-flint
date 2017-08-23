@@ -306,7 +306,6 @@ export default class BaseAdapter extends BaseExtension {
 
         let shouldWrite = !Boolean(this.__dedupIds[dedupId]);
         if (this.__dedupIds[dedupId]) {
-            readCount = this.__dedupIds[dedupId];
             this.__dedupIds[dedupId]--;
             if (this.__dedupIds[dedupId] === 0) {
                 delete this.__dedupIds[dedupId];

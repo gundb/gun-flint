@@ -2,7 +2,7 @@ const Ack = require('./Ack');
 const KeyRing = require('./KeyRing');
 
 // Ensure unique identity for this test run.
-let keyBase = Date.now() + "";
+let keyBase;
 let keyChain = {};    
 let __gun;
 
@@ -150,6 +150,8 @@ module.exports = class Profiler {
         this.desc = desc;
         this.target = target;
         this.node = node;
+
+        keyBase = Date.now() + "";
     }
 
     run(opt, done) {

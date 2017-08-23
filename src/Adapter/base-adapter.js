@@ -304,7 +304,7 @@ export default class BaseAdapter extends BaseExtension {
             return true;
         }
 
-        let readCount = 0;
+        let shouldWrite = !Boolean(this.__dedupIds[dedupId]);
         if (this.__dedupIds[dedupId]) {
             readCount = this.__dedupIds[dedupId];
             this.__dedupIds[dedupId]--;
@@ -312,7 +312,7 @@ export default class BaseAdapter extends BaseExtension {
                 delete this.__dedupIds[dedupId];
             }
         }
-        return readCount < 1;
+        return shouldWrite;
     }
 
     /**

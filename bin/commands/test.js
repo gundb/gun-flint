@@ -62,12 +62,12 @@ Options:
                 } catch (e) {
                     reject(new Error(`Unable to find the adapter OPTIONS in order to run integration tests. Ensure that relative path the options are given: 'flint test ./relative/path/to/adapter --opt="./relative/path/to/opt.js'.`));
                 }
-            
+
                 if (!opt) {
                     throw `Adapter OPTIONS not found at ${path.join(process.cwd(), this.args.opt)}`
                 } else if (opt instanceof Promise) {
                     opt
-                        .then(realOpt => integration(Adapter, opt))
+                        .then(realOpt => integration(Adapter, realOpt))
                         .catch(err => {
                             reject(new Error("Error received while waiting for options promise to resolve."));
                         })

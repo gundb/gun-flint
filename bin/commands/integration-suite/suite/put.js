@@ -51,13 +51,13 @@ describe('Flint Integration Suite:', function() {
             $focus.put(focus.val);
             $ford.put(ford.val);
 
-            let $make = getGun().get(focusKey).get('make');
+            let $make = gun.get(focusKey).get('make');
             $make.put($ford);
 
             let target = Object.keys(ford.val).length;
             let finished = false;
             setTimeout(function() {
-                getGun().get(focusKey).get('make').on(make => {
+                gun.get(focusKey).get('make').on(make => {
                     delete make._;
                     if (!finished && Object.keys(make).length === target) {
                         assert.deepStrictEqual(make, ford.val);
@@ -96,11 +96,11 @@ describe('Flint Integration Suite:', function() {
             var vwTarget = Object.keys(vw.val).length;
             var bmwTarget = Object.keys(bmw.val).length;
 
-            let $manufacturers = getGun().get(germanyKey).get('manufacturers');
+            let $manufacturers = gun.get(germanyKey).get('manufacturers');
             $manufacturers.set($vw);
             $manufacturers.set($bmw);
             setTimeout(() => {
-                getGun().get(germanyKey).get('manufacturers').map().on((maker, key) => {
+                gun.get(germanyKey).get('manufacturers').map().on((maker, key) => {
                     delete maker._;
                     var makerPropCount = Object.keys(maker).length;
                     if (key === vwKey) {
@@ -120,7 +120,7 @@ describe('Flint Integration Suite:', function() {
                         done();
                     }
                 });
-            }, 500);        
+            }, 500);
         });
 
     });
